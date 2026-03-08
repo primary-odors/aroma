@@ -143,8 +143,8 @@ foreach ($pairs as $oid => $p)
     $o = @$odors[$oid];
     if (!$o) continue;
     $fnu = str_replace(' ', '_', $o['full_name']);
-    if (file_exists("../output/$fam/$rcpid/$rcpid~$fnu.active.dock")) $pairs[$oid]["adock"] = "../output/$fam/$rcpid/$rcpid~$fnu.active.dock";
-    if (file_exists("../output/$fam/$rcpid/$rcpid~$fnu.inactive.dock")) $pairs[$oid]["idock"] = "../output/$fam/$rcpid/$rcpid~$fnu.inactive.dock";
+    if (file_exists("../out/$fam/$rcpid/$rcpid~$fnu.active.dock")) $pairs[$oid]["adock"] = "../out/$fam/$rcpid/$rcpid~$fnu.active.dock";
+    if (file_exists("../out/$fam/$rcpid/$rcpid~$fnu.inactive.dock")) $pairs[$oid]["idock"] = "../out/$fam/$rcpid/$rcpid~$fnu.inactive.dock";
 }
 
 // print_r($pairs);

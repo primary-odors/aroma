@@ -47,8 +47,8 @@ fam = data.protutils.family_from_protid(protid)
 uname = odor["full_name"].replace(' ', '_')
 acvi = "active"
 if not active: acvi = f"in{acvi}"
-dockname = f"output/{fam}/{protid}/{protid}~{uname}.{acvi}.dock"
-pdbname = f"output/{fam}/{protid}/{protid}~{uname}.{acvi}.model1.pdb"
+dockname = f"out/{fam}/{protid}/{protid}~{uname}.{acvi}.dock"
+pdbname = f"out/{fam}/{protid}/{protid}~{uname}.{acvi}.model1.pdb"
 
 cmd = ["test/occlusion_test", dockname]
 print(" ".join(cmd), "\n")

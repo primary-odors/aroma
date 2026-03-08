@@ -47,6 +47,7 @@ www/assets/*.woff2
 www/assets/primaryod*
 data/*.bkp.json
 data/receptor_pq.json
+out
 output
 OR*.png
 tmp

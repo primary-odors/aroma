@@ -13,7 +13,7 @@ if argc < 2:
     # print("Both a protein ID and a PDB file are required.")
     print("A protein ID is required. Optionally, a PDB file may also be specified.")
     print("Example usage:")
-    print("python3 hm/fixfail.py OR7D4 output/OR7/OR7D4/OR7D4~androstenone.active.model1.pdb")
+    print("python3 hm/fixfail.py OR7D4 out/OR7/OR7D4/OR7D4~androstenone.active.model1.pdb")
     exit()
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -55,7 +55,7 @@ fam = data.protutils.family_from_protid(protid)
 if argc > 2:
     inppdb = sys.argv[2]
     if not os.path.exists(inppdb):
-        inppdb = f"output/{fam}/{protid}/{protid}~{sys.argv[2]}.{mode}.model1.pdb"
+        inppdb = f"out/{fam}/{protid}/{protid}~{sys.argv[2]}.{mode}.model1.pdb"
     if not os.path.exists(inppdb):
         print(f"Input file not found: {sys.argv[2]}")
         exit()

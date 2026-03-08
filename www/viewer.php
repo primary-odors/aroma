@@ -13,12 +13,12 @@ if (@$_REQUEST['view'] == "pred")
     $n = @$_REQUEST["n"] ?: 1;
 
     chdir(__DIR__);
-    $path = "../output/$fam/$protid/$protid.$odor.$mode.model$n.pdb";
-    if (!file_exists($path)) $path = "../output/$fam/$protid/$protid.$odor.model$n.pdb";
+    $path = "../out/$fam/$protid/$protid.$odor.$mode.model$n.pdb";
+    if (!file_exists($path)) $path = "../out/$fam/$protid/$protid.$odor.model$n.pdb";
     if (!file_exists($path)) die("Something went wrong.");
     $pdb = file_get_contents($path);
 
-    $dock = "../output/$fam/$protid/$protid.$odor.$mode.dock";
+    $dock = "../out/$fam/$protid/$protid.$odor.$mode.dock";
 
     $ligbs = "	var lligbs = [";
     $pdblines = explode("\n", $pdb);
@@ -95,7 +95,7 @@ if (@$_REQUEST['view'] == "dock")
     $n = @$_REQUEST["n"] ?: 1;
 
     chdir(__DIR__);
-    $dock = "../output/$fam/$protid/$protid~$odor.$mode.dock";
+    $dock = "../out/$fam/$protid/$protid~$odor.$mode.dock";
     if (!file_exists($dock)) die("Something went wrong.");
     $txt = file_get_contents($dock);
 
@@ -172,7 +172,7 @@ function svg_from_smiles(smiles, w, h)
     $bsr4sim = array_values(similar_receptors($protid))[0][0];
     // print_r($bsr4sim);
 
-    $dockfname = "../output/$fam/$protid/$protid~$odor.$mode.dock";
+    $dockfname = "../out/$fam/$protid/$protid~$odor.$mode.dock";
     $lbsr = [];
     $lbstr = [];
     $d = file_get_contents($dockfname);

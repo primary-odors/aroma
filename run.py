@@ -125,12 +125,12 @@ for rcpid in data.protutils.prots.keys():
 
         conffna = rcpid + "~" + lignu + ".active.config"
         conffni = rcpid + "~" + lignu + ".inactive.config"
-        if not os.path.exists("output"): os.mkdir("output")
-        if not os.path.exists("output/" + fam): os.mkdir("output/" + fam)
-        if not os.path.exists("output/" + fam + "/" + rcpid): os.mkdir("output/" + fam + "/" + rcpid)
+        if not os.path.exists("out"): os.mkdir("out")
+        if not os.path.exists("out/" + fam): os.mkdir("out/" + fam)
+        if not os.path.exists("out/" + fam + "/" + rcpid): os.mkdir("out/" + fam + "/" + rcpid)
 
         if onlynew or onlymissing:
-            outfna = f"output/{fam}/{rcpid}/{rcpid}~{lignu}.active.dock"
+            outfna = f"out/{fam}/{rcpid}/{rcpid}~{lignu}.active.dock"
             if os.path.exists(outfna) and os.path.getsize(outfna) > 1e5:
                 if onlymissing: continue
                 fmt = os.path.getmtime(outfna)
@@ -170,8 +170,8 @@ for rcpid in data.protutils.prots.keys():
                             for pkt in pocket["pocket"]:
                                 ln = ln + "CEN RES " + pkt + "\n"
                 elif ln[0:4] == "OUT ":
-                    ln = ("OUT output/" + fam + "/" + rcpid + "/" + rcpid + "~" + lignu + ".active.dock" 
-                        + "\nOUTPDB 1 output/" + fam + "/" + rcpid + "/" + rcpid + "~" + lignu + ".active.model%"+"o.pdb")
+                    ln = ("OUT out/" + fam + "/" + rcpid + "/" + rcpid + "~" + lignu + ".active.dock" 
+                        + "\nOUTPDB 1 out/" + fam + "/" + rcpid + "/" + rcpid + "~" + lignu + ".active.model%"+"o.pdb")
 
                 newcfg.append(ln)
 

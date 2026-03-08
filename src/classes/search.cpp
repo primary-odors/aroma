@@ -225,7 +225,7 @@ void Search::do_tumble_spheres(Protein* protein, Molecule* ligand, Point l_pocke
                         u--;
 
                         char fname[1000];
-                        sprintf(fname, "output/tumble_%s_%d_%d_%d_%f.dock",
+                        sprintf(fname, "out/tumble_%s_%d_%d_%d_%f.dock",
                                 lwords[u],
                                 (int)(xrad*fiftyseven),
                                 (int)(yrad*fiftyseven),

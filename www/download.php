@@ -15,7 +15,7 @@ switch (@$_REQUEST["obj"])
         $fam = family_from_protid($prot);
 
         $fn = "$prot.$lig.$mode.model$mdlno.pdb";
-        $path = "../output/$fam/$prot/$fn";
+        $path = "../out/$fam/$prot/$fn";
         break;
     
     case "dock":
@@ -26,7 +26,7 @@ switch (@$_REQUEST["obj"])
         $fam = family_from_protid($prot);
 
         $fn = "$prot.$lig.$mode.dock";
-        $path = "../output/$fam/$prot/$fn";
+        $path = "../out/$fam/$prot/$fn";
         break;
     
     case "json":

@@ -22,7 +22,7 @@ $filter_svgdat = "m 0,0 $fw,$fh 0,$nih $nw,$nt 0,-$noh $fw,-$fh Z";
 
 
 $dockbsr = [];
-$dbsrfn = "../output/dockbsr.json";
+$dbsrfn = "../out/dockbsr.json";
 if (file_exists($dbsrfn)) $dockbsr = json_decode(file_get_contents($dbsrfn), true);
 
 ?>
@@ -94,7 +94,7 @@ foreach ($prots as $protid => $p)
 {
     if (isset($_REQUEST['r']) && $protid != $_REQUEST['r']) continue;
     $fam = family_from_protid($protid);
-    $dockpath = "../output/$fam/$protid";
+    $dockpath = "../out/$fam/$protid";
     if (!file_exists($dockpath)) continue;
     $dir = dir($dockpath);
     $files = [];
@@ -126,7 +126,7 @@ foreach ($prots as $protid => $p)
         $rowid = "$protid~$odor";
         if (!isset($rows[$rowid])) $rows[$rowid] = [];
 
-        $fpn = "../output/$fam/$protid/$fname";
+        $fpn = "../out/$fam/$protid/$fname";
 
         set_time_limit(600);
         if (isset($cached[$fname]) /*&& intval($cached[$fname]['nump'])*/ && filemtime($fpn) < $cachemt)
