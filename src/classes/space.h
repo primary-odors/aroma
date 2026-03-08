@@ -4,8 +4,8 @@
 #ifndef _SPACE
 #define _SPACE
 
-#define min_partial_radius 0.7
-#define min_dist_bounding_box 11
+#define min_partial_radius 1.7/2
+#define min_dist_bounding_box 1.1
 
 class SPartial
 {

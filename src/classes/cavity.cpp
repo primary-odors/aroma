@@ -1,4 +1,5 @@
 
+#include <algorithm>
 #include "cavity.h"
 
 float cav_xmax = Avogadro, cav_xmin = -Avogadro, cav_ymax = Avogadro, cav_ymin = -Avogadro, cav_zmax = Avogadro, cav_zmin = -Avogadro;
@@ -96,7 +97,31 @@ int Cavity::scan_in_protein(Protein* p, Cavity* cavs, int cmax, Progressbar* pgb
     j=0;
     bool any_priority = false;
 
-    float xmin = pcen.x - pbox.x + min_dist_bounding_box, xmax = pcen.x + pbox.x - min_dist_bounding_box;
+    // Pre-scan to find the median and max side chain occlusions.
+    float resoccl[er-sr+2];
+    for (i=sr; i<=er; i++)
+    {
+        AminoAcid* aa = p->get_residue(i);
+        if (aa)
+        {
+            float f = aa->occlusion_by_mclashables();
+            if (f) resoccl[j++] = f;
+        }
+    }
+
+    float medoccl, maxoccl;
+    if (j)
+    {
+        std::sort(resoccl, resoccl+j);
+        medoccl = resoccl[j/2];         // close enough
+        maxoccl = resoccl[j-1];
+    }
+    else throw 0xbadc0de;
+    float occl_threshold = (medoccl+maxoccl) / 2 * cavity_occlusion_threshold_mult;
+
+    float xmin = fmax(cav_xmin, pcen.x - pbox.x + min_dist_bounding_box), xmax = fmin(cav_xmax, pcen.x + pbox.x - min_dist_bounding_box);
+    float ymin = fmax(cav_ymin, pcen.y - pbox.y + min_dist_bounding_box), ymax = fmin(cav_ymax, pcen.y + pbox.y - min_dist_bounding_box);
+    float zmin = fmax(cav_zmin, pcen.z - pbox.z + min_dist_bounding_box), zmax = fmin(cav_zmax, pcen.z + pbox.z - min_dist_bounding_box);
     if (pgb)
     {
         pgb->minimum = xmin;
@@ -105,15 +130,16 @@ int Cavity::scan_in_protein(Protein* p, Cavity* cavs, int cmax, Progressbar* pgb
     }
     else cout << "Cavity search in progress..." << flush;
 
+    j=0;
     for (x = xmin; x <= xmax; x += step)
     {
         if (pgb) pgb->update(x);
         else cout << "." << flush;
         yoff = yoff ? 0 : step/2;
-        for (y = pcen.y - pbox.y + min_dist_bounding_box - yoff; y <= pcen.y + pbox.y - min_dist_bounding_box; y += step)
+        for (y = ymin - yoff; y <= ymax; y += step)
         {
             zoff = zoff ? 0 : step/2;
-            for (z = pcen.z - pbox.z + min_dist_bounding_box - zoff; z <= pcen.z + pbox.z - min_dist_bounding_box; z += step)
+            for (z = zmin - zoff; z <= zmax; z += step)
             {
                 Point pt(x,y,z);
                 dummy.recenter(pt);
@@ -128,7 +154,7 @@ int Cavity::scan_in_protein(Protein* p, Cavity* cavs, int cmax, Progressbar* pgb
                 }
                 float occlavg = occltot / i;
                 // cout << pt << " avg mclashable occlusion: " << occlavg << endl;
-                if (occlavg < cavity_min_occlusion) continue;            // Too isolated.
+                if (occlavg < occl_threshold) continue;            // Too isolated.
 
                 float rmin;
                 CPartial working;
@@ -141,7 +167,7 @@ int Cavity::scan_in_protein(Protein* p, Cavity* cavs, int cmax, Progressbar* pgb
                     {
                         // Add a slight "give" for side chains of aminos with greater flexional probability.
                         float aafp = can_clash[i]->get_aa_definition()->flexion_probability;
-                        if (aafp >= 0.075) r += aafp * 2.9 * max(0, a->get_Greek()-2);
+                        if (aafp >= 0.075) r += aafp * flexional_give_coefficient * max(0, a->get_Greek()-2);
                     }
 
                     if (r < rmin || !i)

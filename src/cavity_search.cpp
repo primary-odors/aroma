@@ -79,7 +79,7 @@ int main(int argc, char** argv)
     protein = &p;
     outfile[0] = 0;
     bool condense = false;
-    ResiduePlaceholder sr, er;
+    ResiduePlaceholder sr, er, xmaxrp, ymaxrp, zmaxrp, xminrp, yminrp, zminrp;
 
     protfname = nullptr;
 
@@ -243,6 +243,12 @@ int main(int argc, char** argv)
         else if (!strcmp(buffer, "--xmin")) cav_xmin = atof(argv[++i]);
         else if (!strcmp(buffer, "--ymin")) cav_ymin = atof(argv[++i]);
         else if (!strcmp(buffer, "--zmin")) cav_zmin = atof(argv[++i]);
+        else if (!strcmp(buffer, "--xmaxr")) xmaxrp.set(argv[++i]);
+        else if (!strcmp(buffer, "--ymaxr")) ymaxrp.set(argv[++i]);
+        else if (!strcmp(buffer, "--zmaxr")) zmaxrp.set(argv[++i]);
+        else if (!strcmp(buffer, "--xminr")) xminrp.set(argv[++i]);
+        else if (!strcmp(buffer, "--yminr")) yminrp.set(argv[++i]);
+        else if (!strcmp(buffer, "--zminr")) zminrp.set(argv[++i]);
         else if (!strcmp(buffer, "--xyrlim")) cav_xyrlim = atof(argv[++i]);
         else if (!strcmp(buffer, "--xzrlim")) cav_xzrlim = atof(argv[++i]);
         else if (!strcmp(buffer, "--yzrlim")) cav_yzrlim = atof(argv[++i]);
@@ -303,6 +309,15 @@ int main(int argc, char** argv)
         return -1;
     }
     int seqlen = p.get_end_resno();
+
+    if (xmaxrp.bw.length()) { xmaxrp.resolve_resno(&p); if (xmaxrp.resno) { AminoAcid *aa = p.get_residue(xmaxrp.resno); if (aa) cav_xmax = aa->get_CA_location().x; } }
+    if (ymaxrp.bw.length()) { ymaxrp.resolve_resno(&p); if (ymaxrp.resno) { AminoAcid *aa = p.get_residue(ymaxrp.resno); if (aa) cav_ymax = aa->get_CA_location().y; } }
+    if (zmaxrp.bw.length()) { zmaxrp.resolve_resno(&p); if (zmaxrp.resno) { AminoAcid *aa = p.get_residue(zmaxrp.resno); if (aa) cav_zmax = aa->get_CA_location().z; } }
+    if (xminrp.bw.length()) { xminrp.resolve_resno(&p); if (xminrp.resno) { AminoAcid *aa = p.get_residue(xminrp.resno); if (aa) cav_xmin = aa->get_CA_location().x; } }
+    if (yminrp.bw.length()) { yminrp.resolve_resno(&p); if (yminrp.resno) { AminoAcid *aa = p.get_residue(yminrp.resno); if (aa) cav_ymin = aa->get_CA_location().y; } }
+    if (zminrp.bw.length()) { zminrp.resolve_resno(&p); if (zminrp.resno) { AminoAcid *aa = p.get_residue(zminrp.resno); if (aa) cav_zmin = aa->get_CA_location().z; } }
+
+    cout << "Bounding box: [ " << cav_xmin << ", " << cav_ymin << ", " << cav_zmin << "] ~ [" << cav_xmax << ", " << cav_ymax << ", " << cav_zmax << "]" << endl;
 
     if (sr.bw.length()) sr.resolve_resno(&p);
     if (sr.resno) cav_resmin = sr.resno;
