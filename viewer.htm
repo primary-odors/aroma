@@ -616,7 +616,7 @@ function loadFile(fileData, fileName = "", custom_color_scheme = false)
 
 							resno = parseInt(resno.substr(3));
 							var energy = parseFloat(pieces[1]);
-							if (energy > -0.3) continue;
+							if (energy > -0.08) continue;
 
 							if (typeof resapos[lpose] == 'undefined') continue;
 							if (typeof resapos[lpose][lnode] == 'undefined') continue;
@@ -644,12 +644,12 @@ function loadFile(fileData, fileName = "", custom_color_scheme = false)
 
 							var morceaux = pieces[0].split(':');
 							var aa1name = morceaux[0];
-							var res1no = parseInt(" 0" + aa1name.replace(/\(.+\)/g, "").replace(/_.+/g, "").replace(/[^0-9]+-/g, "").replace(/[^0-9]/g, ""));
+							var res1no = parseInt(" 0" + aa1name.replace(/\(.+\)/g, "").replace(/_.+/g, "").replace(/[0-9]+[,]/g, "").replace(/[0-9]+-/g, "").replace(/[^0-9]/g, ""));
 							var atom1name = morceaux[1];
 
 							var morceaux = pieces[1].split(':');
 							var aa2name = morceaux[0];
-							var res2no = parseInt(" 0" + aa2name.replace(/\(.+\)/g, "").replace(/_.+/g, "").replace(/[^0-9]+-/g, "").replace(/[^0-9]/g, ""));
+							var res2no = parseInt(" 0" + aa2name.replace(/\(.+\)/g, "").replace(/_.+/g, "").replace(/[0-9]+[,]/g, "").replace(/[0-9]+-/g, "").replace(/[^0-9]/g, ""));
 							var atom2name = morceaux[1];
 
 							var venergy = parseFloat(morceaux[2]);
@@ -4248,7 +4248,7 @@ function update_visinters()
 		var color = [0,0,1];
 		var opacity = max_opacity;
 
-		var cidx = Math.min(Math.sqrt(-value[2])/5, 1) * 3.14;
+		var cidx = Math.min(Math.sqrt(-value[2]/5), 1) * 3.14;
 		var rgb = firegrad(cidx);
 
 		color = [parseFloat(rgb[0])/255, parseFloat(rgb[1])/255, parseFloat(rgb[2])/255];
