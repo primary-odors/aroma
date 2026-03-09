@@ -181,7 +181,6 @@ foreach (explode("\n", $c) as $ln)
     if (isset($prots[$id]))
     {
         $ali[$id] = $sq;
-        // foreach ($ells as $l) $ali[$id] .= substr($sq, $l, 1);
     }
     else if (preg_match("/^[LM\\s]+$/", $ln))
     {
@@ -229,6 +228,8 @@ foreach ($subseqs as $fam => $subs)
     uasort($subsensus[$fam], "lencmp");
 }
 
+$subsensus["OR2"]["M/T/V"] = generate_consensus([$subsensus["OR2"]["M"], $subsensus["OR2"]["T"], $subsensus["OR2"]["V"]]);
+
 $tnodes = [];
 $cladeseqs =
 [
@@ -264,12 +265,21 @@ foreach ($famtree as $k => $bt) $tnodes["$bt"] = $k;
 
 $subtree = [];
 
-foreach ($subseqs as $fam => $subs)
+$subsensus2MTV = ["M" => $subsensus["OR2"]["M"], "T" => $subsensus["OR2"]["T"], "V" => $subsensus["OR2"]["V"]];
+unset($subsensus["OR2"]["M"]);
+unset($subsensus["OR2"]["T"]);
+unset($subsensus["OR2"]["V"]);
+foreach ($subsensus as $fam => $subsens)
 {
-    $subtree[$fam] = generate_btree($subsensus[$fam], $famtree[$fam]);
+    $subtree[$fam] = generate_btree($subsens, $famtree[$fam]);
     uasort($subtree[$fam], "lencmp");
     // print_r($subtree);    exit;
 }
+
+$fuck = generate_btree($subsensus2MTV, $subtree["OR2"]["M/T/V"]);
+$subtree["OR2"] = array_merge($subtree["OR2"], $fuck);
+unset($subtree["OR2"]["M/T/V"]);
+
 uasort($subtree, "lencmp");
 print_r($subtree);
 
