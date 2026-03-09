@@ -3,6 +3,15 @@
 chdir(__DIR__);
 include_once("protutils.php");
 
+function lencmp($a, $b)
+{
+    $ca = is_array($a) ? count($a) : strlen($a);
+    $cb = is_array($b) ? count($b) : strlen($b);
+
+    if ($ca == $cb) return 0;
+    return ($ca < $cb) ? 1 : -1;
+}
+
 function generate_consensus($aligneds)
 {
     $bins = [];
@@ -31,7 +40,6 @@ function generate_consensus($aligneds)
 
     return $consensus;
 }
-
 function generate_btree($sequences, $prefix = "")
 {
     $cs = count($sequences);
@@ -40,7 +48,7 @@ function generate_btree($sequences, $prefix = "")
         return [array_keys($sequences)[0] => $prefix.'0', array_keys($sequences)[1] => $prefix.'1'];
 
     $keys = array_keys($sequences);
-    shuffle($keys);
+    // shuffle($keys);
 
     $consensus = generate_consensus($sequences);
     $outgroup = false;
@@ -150,15 +158,54 @@ opfisehciet;
     return $btree;
 }
 
+function find_bt_of_root($clade)
+{
+    $cursor = false;
+    foreach($clade as $bt)
+    {
+        if (!$cursor) $cursor = $bt;
+        else
+        {
+            for ($i=strlen($cursor); $i; $i--)
+            {
+                if (substr($cursor, 0, $i) == substr($bt, 0, $i))
+                {
+                    $cursor = substr($cursor, 0, $i);
+                    break;
+                }
+            }
+        }
+    }
+    return $cursor;
+}
+
 $ali = [];
 $c = file_get_contents("sequences_aligned.txt");
+$ells = [];
 foreach (explode("\n", $c) as $ln)
 {
     $id = trim(substr($ln, 0, 7));
     $sq = substr($ln, 8);
 
-    if (isset($prots[$id])) $ali[$id] = $sq;
+    if (isset($prots[$id]))
+    {
+        $ali[$id] = $sq;
+        // foreach ($ells as $l) $ali[$id] .= substr($sq, $l, 1);
+    }
+    else if (preg_match("/^[LM\\s]+$/", $ln))
+    {
+        $ells = [];
+        $j=0;
+        while ($j = strpos($sq, 'L', $j))
+        {
+            $ells[] = $j;
+            $j++;
+        }
+    }
 }
+
+if (!count($ells)) die("No ells.\n");
+// print_r($ells); exit;
 
 $consensus = [];
 $subsensus = [];
@@ -180,6 +227,7 @@ foreach ($famseqs as $fam => $seqs)
 {
     $consensus[$fam] = generate_consensus($seqs);
 }
+uasort($consensus, "lencmp");
 
 foreach ($subseqs as $fam => $subs)
 {
@@ -187,8 +235,10 @@ foreach ($subseqs as $fam => $subs)
     {
         $subsensus[$fam][$sub] = generate_consensus($seqs);
     }
+    uasort($subsensus[$fam], "lencmp");
 }
 
+$tnodes = [];
 $cladeseqs =
 [
     "ClassI" => generate_consensus([ $consensus["OR51"], $consensus["OR52"], $consensus["OR56"] ]),
@@ -201,7 +251,10 @@ $cladeseqs =
 ];
 
 $cladetree = generate_btree($cladeseqs, "00");
+uasort($cladetree, "lencmp");
 print_r($cladetree);
+
+foreach ($cladetree as $k => $bt) $tnodes["*$bt"] = $k;
 
 $famtree = generate_btree(["OR51" => $consensus["OR51"], "OR52" => $consensus["OR52"], "OR56" => $consensus["OR56"]], $cladetree["ClassI"]);
 $famtree = array_merge($famtree, generate_btree(["OR1" => $consensus["OR1"], "OR3" => $consensus["OR3"], "OR7" => $consensus["OR7"]], $cladetree["OR1/3/7"]));
@@ -213,17 +266,27 @@ $famtree = array_merge($famtree, generate_btree(["OR14" => $consensus["OR14"]], 
 $famtree = array_merge($famtree, generate_btree(["TAAR" => $consensus["TAAR"]], "01"));
 $famtree = array_merge($famtree, generate_btree(["VN1R" => $consensus["VN1R"]], "1"));
 
+uasort($famtree, "lencmp");
 print_r($famtree);
-// exit;
+
+foreach ($famtree as $k => $bt) $tnodes["$bt"] = $k;
 
 $subtree = [];
 
 foreach ($subseqs as $fam => $subs)
 {
     $subtree[$fam] = generate_btree($subsensus[$fam], $famtree[$fam]);
+    uasort($subtree[$fam], "lencmp");
     // print_r($subtree);    exit;
 }
+uasort($subtree, "lencmp");
 print_r($subtree);
+
+foreach ($subtree as $fam => $subs) foreach ($subs as $sub => $bt) $tnodes["$bt"] = $fam.$sub;
+$tnodes['*'.find_bt_of_root([$subtree["OR2"]["M"], $subtree["OR2"]["T"], $subtree["OR2"]["V"]])] = "OR2M/T/V";
+$tnodes['*'.find_bt_of_root([$subtree["OR5"]["A"], $subtree["OR5"]["AN"]])] = "OR5A/AN";
+$tnodes['*'.find_bt_of_root([$subtree["OR6"]["A"], $subtree["OR6"]["B"], $subtree["OR6"]["P"], $subtree["OR6"]["Y"]])] = "Schiff6";
+$tnodes['*'.find_bt_of_root([$subtree["OR10"]["D"], $subtree["OR10"]["G"], $subtree["OR10"]["S"]])] = "OR10D/G/S";
 
 $rcptree = [];
 foreach ($subtree as $fam => $subs)
@@ -237,7 +300,6 @@ foreach ($subtree as $fam => $subs)
             if ($sub != subfamily_from_protid($protid)) continue;
             $sequences[$protid] = $ali[$protid];
         }
-        // $sequences["VN1R"] = "DQNTMINDMEGIUSTAGARPAGESEQVENCEDESIGNEDTQALWAYSCARRYTHERQLEQFRQQTNQDE";
         $ltree = generate_btree($sequences, $fb);
         $rcptree = array_merge($rcptree, $ltree);
     }
@@ -245,11 +307,8 @@ foreach ($subtree as $fam => $subs)
 // print_r($rcptree);
 
 foreach ($rcptree as $protid => $bt) if (isset($prots[$protid])) $prots[$protid]["btree"] = $bt;
+natsort($tnodes);
 
-$fp = fopen("../data/receptor.json", "w");
-if ($fp)
-{
-	fwrite($fp, json_encode_pretty($prots));
-	fclose($fp);
-}
+file_put_contents("../data/receptor.json", json_encode_pretty($prots));
+file_put_contents("../data/tree_nodes.json", json_encode_pretty($tnodes));
 

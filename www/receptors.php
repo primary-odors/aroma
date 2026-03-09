@@ -220,7 +220,7 @@ foreach ($treenodes as $nodeid => $nodename)
         $major[$nodename] = "<a href=\"receptors.php?tree=1&bt=".substr($nodeid,1)."\">$nodename</a>";
     }
 }
-if (0 && count($major))
+if (count($major))
 {
     $keys = array_keys($major);
     natsort($keys);
