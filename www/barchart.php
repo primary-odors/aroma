@@ -11,6 +11,8 @@ function lum($r, $g, $b)
     return $rcontrib*$r + $gcontrib*$g + $bcontrib*$b;
 }
 
+$dispcolors = json_decode(file_get_contents("../data/dispcolor.json"), true);
+
 $bkcolor = [0x15, 0x1a, 0x37];
 
 $bkcol_tetrapod = $bkcolor;
@@ -183,35 +185,17 @@ $sapphire = imagecolorallocate($im,32,16,224);
 
 function orclr($fam, $im = false)
 {
+    global $dispcolors;
+
     if ($im)
     {
         $rgb = orclr($fam, false);            // RECURSION!
         return imagecolorallocate($im, $rgb[0], $rgb[1], $rgb[2]);
     }
 
-    switch ($fam)
-    {
-        case 1: return [0xff, 0xff, 0x99];
-        case 2: return [0xff, 0xcc, 0x00];
-        case 3: return [0x99, 0xff, 0x00];
-        case 4: return [0x99, 0x66, 0xff];
-        case 5: return [0xff, 0x66, 0x88];
-        case 6: return [0x00, 0xee, 0xff];
-        case 7: return [0xff, 0x33, 0x44];
-        case 8: return [0xff, 0x77, 0x00];
-        case 9: return [0xff, 0x55, 0x22];
-        case 10: return [0x99, 0x66, 0x33];
-        case 11: return [0xaa, 0xcc, 0xee];
-        case 12: return [0xdd, 0xff, 0x00];
-        case 13: return [0x00, 0xff, 0x99];
-        case 14: return [0x33, 0x99, 0xff];
-        case 51: return [0xff, 0xbb, 0x66];
-        case 52: return [0xff, 0x33, 0xcc];
-        case 56: return [0x22, 0xff, 0x55];
-        case "TAAR": return [0x33, 0x22, 0xff];
-        case "VN1R": return [0x99, 0xdd, 0xff];
-        default: return [0xff, 0xff, 0xff];
-    }
+    if (isset($dispcolors[$fam])) return $dispcolors[$fam];
+    else if (isset($dispcolors["OR$fam"])) return $dispcolors["OR$fam"];
+    else return [0xff, 0xff, 0xff];
 }
 
 for ($i=1; $i<=14; $i++)
