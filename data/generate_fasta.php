@@ -71,18 +71,6 @@ function get_sequence($protid)
     else return $prots[$protid]['sequence'];
 }
 
-function make_fasta($protid, $sequence)
-{
-    $ret = ">$protid";
-    while ($sequence)
-    {
-        $ret .= "\n".substr($sequence, 0, 80);
-        $sequence = substr($sequence, 80);
-    }
-    $ret .= "*\n\n";
-    return $ret;
-}
-
 foreach (@$argv as $a)
 {
 	$a = explode('=',$a,2);

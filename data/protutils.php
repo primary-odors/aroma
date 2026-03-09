@@ -200,6 +200,18 @@ function bw_insdel($prot, $tmrno, $offset)
 	return $insdel;
 }
 
+function make_fasta($protid, $sequence)
+{
+    $ret = ">$protid";
+    while ($sequence)
+    {
+        $ret .= "\n".substr($sequence, 0, 80);
+        $sequence = substr($sequence, 80);
+    }
+    $ret .= "*\n\n";
+    return $ret;
+}
+
 function resno_from_bw($protid, $bw)
 {
 	global $prots;
@@ -250,7 +262,7 @@ function bw_from_resno($protid, $resno)
 			$tmrno = intval(substr($rgn, -1));
 			if ($resno >= $se['start'] && $resno <= $se['end'])
 			{
-				$res50 = intval(@$prot["bw"]["$tmrno.50"]) or die("Unknown Ballesteros-Weinstein number: $bw.\n");
+				$res50 = intval(@$prot["bw"]["$tmrno.50"]) or die("Unknown Ballesteros-Weinstein helix number: $tmrno.\n");
 				$offset = $resno - $res50 + 50;
 
 				$insdel = bw_insdel($prot, $tmrno, $offset);
@@ -269,7 +281,7 @@ function bw_from_resno($protid, $resno)
 				if (isset($prot['bw']["{$tmr_1}{$tmrno}.50"]))
 				{
 					$tmrno = intval("{$tmr_1}{$tmrno}");
-					$res50 = intval(@$prot["bw"]["$tmrno.50"]) or die("Unknown Ballesteros-Weinstein number: $bw.\n");
+					$res50 = intval(@$prot["bw"]["$tmrno.50"]) or die("Unknown Ballesteros-Weinstein helix number: $tmrno.\n");
 					$offset = $resno - $res50 + 50;
 
 					$insdel = bw_insdel($prot, $tmrno, $offset);

@@ -3,127 +3,223 @@
 chdir(__DIR__);
 include_once("protutils.php");
 
-define("inhouse", false);
-
-function long_levenshtein($str1, $str2)
+function generate_consensus($aligneds)
 {
-    return levenshtein(substr($str1, 0, 200), substr($str2, 0, 200)) + levenshtein(substr($str1, 200), substr($str2, 200));
-}
-
-$tree = file_get_contents("btree");
-$lines = explode("\n", $tree);
-
-foreach ($prots as $rcpid => $pdata) unset($prots[$rcpid]['btree']);
-
-
-$prots["TAAR5"]["btree"] = "001";
-$prots["VN1R1"]["btree"] = "01";
-// $prots["MS4A1"]["btree"] = "1";
-
-if (inhouse)
-{
-    $prots["OR2W1"]["btree"] = "0000";
-    $prots["OR52D1"]["btree"] = "0001";
-}
-else foreach ($lines as $lno => $ln)
-{
-    if (substr($ln, 0, 1) == '#') continue;
-    $pieces = explode(" ", $ln);
-    if (count($pieces) != 2) continue;
-
-    $binary = $pieces[0];
-    $receptor = $pieces[1];
-
-    if (!preg_match("/^[01]+$/", $binary)) continue;
-
-    foreach (explode("/", $receptor) as $rcpid)
+    $bins = [];
+    foreach ($aligneds as $seq)
     {
-        if (isset($prots[$rcpid]))
+        for ($i=0; $i<strlen($seq); $i++)
         {
-            $prots[$rcpid]['btree'] = "000$binary";
-            echo "$rcpid\n";
+            if (!isset($bins[$i])) $bins[$i] = [];
+            $c = substr($seq, $i, 1);
+            if ($c < 'A' || $c > 'V') continue;
+            if (!isset($bins[$i][$c])) $bins[$i][$c] = 1;
+            else $bins[$i][$c]++;
         }
     }
+
+    $consensus = "";
+    foreach ($bins as $i => $b)
+    {
+        if (!count($b)) $consensus .= "-";
+        else
+        {
+            arsort($b);
+            $consensus .= array_keys($b)[0];
+        }
+    }
+
+    return $consensus;
 }
 
-foreach ($prots as $rcpid => $pdata)
+function generate_btree($sequences, $prefix = "")
 {
-    // if (!inhouse && substr($rcpid, 0, 2) != "OR") continue;
-    if (!isset($pdata["region"]["TMR3"]["start"])) continue;
-    if (!isset($pdata['btree']))
+    $cs = count($sequences);
+    if ($cs == 1) return [array_keys($sequences)[0] => $prefix];
+    else if ($cs == 2)
+        return [array_keys($sequences)[0] => $prefix.'0', array_keys($sequences)[1] => $prefix.'1'];
+
+    $keys = array_keys($sequences);
+    shuffle($keys);
+
+    $consensus = generate_consensus($sequences);
+    $outgroup = false;
+    $outdist = 1e9;
+    foreach ($sequences as $k => $seq)
     {
-        $len = intval($pdata["region"]["TMR7"]["end"]) - intval($pdata["region"]["TMR3"]["start"]);
-        $seq1 = substr($pdata['sequence'], intval($pdata["region"]["TMR3"]["start"]), $len);
-        $best_match = false;
-        $best_btree = false;
-        $best_distance = 10000;
-        foreach ($prots as $rcp2 => $p2)
+        $dist = similar_text($seq, $consensus);
+        if ($dist < $outdist)
         {
-            if (!isset($p2['btree'])) continue;
-
-            $len = intval($p2["region"]["TMR7"]["end"]) - intval($p2["region"]["TMR3"]["start"]);
-            $seq2 = substr($p2['sequence'], intval($p2["region"]["TMR3"]["start"]), $len);
-            $lev = long_levenshtein($seq1, $seq2);
-            // $lev += levenshtein($rcpid, $rcp2);
-            if ($lev < $best_distance)
-            {
-                $best_match = $rcp2;
-                $best_btree = $p2['btree'];
-                $best_distance = $lev;
-            }
+            $outdist = $dist;
+            $outgroup = $k;
         }
+    }
+    if (isset($sequences["VN1R"])) $outgroup = "VN1R";
+    // echo "OUTGROUP: $outgroup\n";
 
-        if ($best_match)
+    $fasta = "";
+    foreach($keys as $fam) $fasta .= make_fasta($fam, $sequences[$fam]);
+
+    file_put_contents("../tmp/tmp.fasta", $fasta);
+    $og = count($sequences)-1;
+    $cmd = "clustalw -infile=../tmp/tmp.fasta -tree -seed=8647 -outputtree=nexus";
+    // echo "$cmd\n";
+    exec($cmd);
+    $roottree = <<<opfisehciet
+from Bio import Phylo
+from io import StringIO
+
+tree = Phylo.read("../tmp/tmp.tre", "nexus")
+outgroup_name = "$outgroup"
+outgroup_clade = tree.find_clades(outgroup_name)
+
+try:
+    outgroup = next(outgroup_clade)
+    tree.root_with_outgroup(outgroup)
+    print(f"Tree successfully rerooted with {outgroup_name} as the outgroup.")
+
+except StopIteration:
+    print(f"Error: Outgroup '{outgroup_name}' not found in the tree.")
+
+Phylo.write(tree, "../tmp/rooted.tre", "nexus")
+opfisehciet;
+    file_put_contents("roottree.py", $roottree);
+    $cmd = "python3 roottree.py";
+    // echo "$cmd\n";
+    exec($cmd);
+
+    $btree = [];
+    $c = file_get_contents("../tmp/rooted.tre");
+    foreach (explode("\n", $c) as $ln)
+    {
+        if (substr(trim($ln), 0, 5) == "Tree ")
         {
-            /*
-            $prots[$best_match]['btree'] .= '0';
-            $prots[$rcpid]['btree'] = $best_btree.'1';
-            */
-            // echo "$rcpid -- $best_match\n";
+            $treedat = explode('=', $ln, 2)[1];
+            $nodists = preg_replace("/:[0-9.-]+/", "", $treedat);
+            // echo "$nodists\n";
 
-            $seq2 = $prots[$best_match]['sequence'];
-            $mrca = $best_btree;
-            $n = strlen($mrca);
-            foreach ($prots as $p3)
+            $cursor = $prefix;
+            while ($nodists)
             {
-                if (!isset($p3['btree'])) continue;
-                $len = intval($p3["region"]["TMR7"]["end"]) - intval($p3["region"]["TMR3"]["start"]);
-                $seq3 = substr($p3['sequence'], intval($p3["region"]["TMR3"]["start"]), $len);
-                $lev = long_levenshtein($seq2, $seq3);
-                if ($lev < $best_distance)
+                $c = substr($nodists, 0, 1);
+                if ($c == '(')
                 {
-                    foreach (str_split($p3['btree']) as $i => $c)
+                    $cursor .= '0';
+                    $nodists = substr($nodists, 1);
+                    // echo "$cursor\t\t$nodists\n";
+                }
+                else if ($c == ',')
+                {
+                    $motherfucker = 1+intval(substr($cursor, -1));
+                    if ($motherfucker > 1)
                     {
-                        if ($i >= $n) break;
-                        if ($c != substr($mrca, $i, 1))
-                        {
-                            $mrca = substr($mrca, 0, $i-1);
-                            $n = strlen($mrca);
-                            break;
-                        }
+                        $l = strlen($cursor)-1;
+                        foreach ($btree as $k => $v) $btree[$k] = substr($v, 0, $l).'0'.substr($v, $l);
+                        $motherfucker--;
                     }
+                    $cursor = substr($cursor, 0, -1).$motherfucker;
+                    $nodists = substr($nodists, 1);
+                    // echo "$cursor\t\t$nodists\n";
                 }
-            }
-
-            // echo "MRCA is $mrca\n";
-            $n = strlen($mrca);
-            foreach ($prots as $l => $p3)
-            {
-                if (!isset($p3['btree'])) continue;
-                if (substr($p3['btree'], 0, $n) === $mrca)
+                else if ($c == ')')
                 {
-                    // echo "\t$l btree was {$p3['btree']}";
-                    $prots[$l]['btree'] = $mrca.'0'.substr($p3['btree'], $n);
-                    // echo " now {$prots[$l]['btree']}\n";
+                    $cursor = substr($cursor, 0, -1);
+                    $nodists = substr($nodists, 1);
+                    // echo "$cursor\t\t$nodists\n";
+                }
+                else if ($c == ';')
+                {
+                    break;
+                }
+                else
+                {
+                    $m = [];
+                    preg_match("/^[^();,]+/", $nodists, $m);
+                    $name = $m[0];
+                    $btree[$name] = $cursor;
+                    $nodists = substr($nodists, strlen($name));
                 }
             }
 
-            $prots[$rcpid]['btree'] = $mrca.'1';
-            echo "$rcpid btree is now {$prots[$rcpid]['btree']}\n";
+            break;
         }
-        else die("Nobody likes $rcpid.\n");
+    }
+
+    // print_r($btree);
+    return $btree;
+}
+
+$ali = [];
+$c = file_get_contents("sequences_aligned.txt");
+foreach (explode("\n", $c) as $ln)
+{
+    $id = trim(substr($ln, 0, 7));
+    $sq = substr($ln, 8);
+
+    if (isset($prots[$id])) $ali[$id] = $sq;
+}
+
+$consensus = [];
+$subsensus = [];
+$famseqs = [];
+$subseqs = [];
+foreach ($prots as $protid => $p)
+{
+    if (!isset($ali[$protid])) continue;
+    $fam = family_from_protid($protid);
+    if (!isset($famseqs[$fam])) $famseqs[$fam] = [];
+    $famseqs[$fam][$protid] = $ali[$protid];
+
+    $sub = subfamily_from_protid($protid);
+    if (!isset($subseqs[$fam][$sub])) $subseqs[$fam][$sub] = [];
+    $subseqs[$fam][$sub][$protid] = $ali[$protid];
+}
+
+foreach ($famseqs as $fam => $seqs)
+{
+    $consensus[$fam] = generate_consensus($seqs);
+}
+
+foreach ($subseqs as $fam => $subs)
+{
+    foreach ($subs as $sub => $seqs)
+    {
+        $subsensus[$fam][$sub] = generate_consensus($seqs);
     }
 }
+
+$famtree = generate_btree($consensus);
+print_r($famtree);
+
+$subtree = [];
+
+foreach ($subseqs as $fam => $subs)
+{
+    $subtree[$fam] = generate_btree($subsensus[$fam], $famtree[$fam]);
+    // print_r($subtree);    exit;
+}
+print_r($subtree);
+
+$rcptree = [];
+foreach ($subtree as $fam => $subs)
+{
+    foreach ($subs as $sub => $fb)
+    {
+        $sequences = [];
+        foreach (array_keys($prots) as $protid)
+        {
+            if ($fam != family_from_protid($protid)) continue;
+            if ($sub != subfamily_from_protid($protid)) continue;
+            $sequences[$protid] = $ali[$protid];
+        }
+        // $sequences["VN1R"] = "DQNTMINDMEGIUSTAGARPAGESEQVENCEDESIGNEDTQALWAYSCARRYTHERQLEQFRQQTNQDE";
+        $ltree = generate_btree($sequences, $fb);
+        $rcptree = array_merge($rcptree, $ltree);
+    }
+}
+// print_r($rcptree);
+
+foreach ($rcptree as $protid => $bt) if (isset($prots[$protid])) $prots[$protid]["btree"] = $bt;
 
 $fp = fopen("../data/receptor.json", "w");
 if ($fp)
@@ -131,3 +227,4 @@ if ($fp)
 	fwrite($fp, json_encode_pretty($prots));
 	fclose($fp);
 }
+
