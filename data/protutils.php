@@ -7,6 +7,17 @@
 
 global $prots, $aminos;
 
+function lencmp($a, $b)
+{
+	if (substr($a, 0, 1) == '*') $a = substr($a, 1);
+	if (substr($b, 0, 1) == '*') $b = substr($b, 1);
+    $ca = is_array($a) ? count($a) : strlen($a);
+    $cb = is_array($b) ? count($b) : strlen($b);
+
+    if ($ca == $cb) return 0;
+    return ($ca < $cb) ? 1 : -1;
+}
+
 function amino_similarity($letter1, $letter2)
 {
 	if ($letter1 == $letter2) return 1;

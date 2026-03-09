@@ -3,15 +3,6 @@
 chdir(__DIR__);
 include_once("protutils.php");
 
-function lencmp($a, $b)
-{
-    $ca = is_array($a) ? count($a) : strlen($a);
-    $cb = is_array($b) ? count($b) : strlen($b);
-
-    if ($ca == $cb) return 0;
-    return ($ca < $cb) ? 1 : -1;
-}
-
 function generate_consensus($aligneds)
 {
     $bins = [];

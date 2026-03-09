@@ -275,13 +275,17 @@ function showSkeletal(e, smiles)
 
 if (@$receptor["btree"])
 {
-    foreach ($treenodes as $nodeid => $nodename)
+    $tnk = array_keys($treenodes);
+    usort($tnk, "lencmp");
+    $tnk = array_reverse($tnk);
+    foreach ($tnk as $nodeid)
     {
+        $nodename = $treenodes[$nodeid];
         $nodeid = str_replace('*', '', $nodeid);
         $len = strlen($nodeid);
         if (substr($receptor["btree"], 0, $len) === $nodeid)
         {
-            echo "<a href=\"receptors.php?tree=1&bt=$nodeid\">$nodename</a>, ";
+            echo "<a href=\"receptors.php?tree=1&bt=$nodeid\">$nodename</a> > ";
         }
     }
     echo $rcpid;
