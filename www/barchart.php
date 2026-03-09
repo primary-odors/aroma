@@ -36,6 +36,7 @@ if (isset($_REQUEST["m"])) $mode = $_REQUEST["m"];
 
 $t = [];
 $tprobs = [];
+$tago = [];
 $e = [];
 $p = [];
 
@@ -57,7 +58,12 @@ switch ($mode)
                 else if ($a['type'] == "va") $act = 0.333;
                 else if ($a['type'] == "pa")
                 {
-                    $act = 4;
+                    $act = 1;
+                    $tprobs[$rcpid] = true;
+                }
+                else if ($a['type'] == "a")
+                {
+                    $act = 8;
                     $tprobs[$rcpid] = true;
                 }
                 if ($act) $maxt = 10;
@@ -229,43 +235,25 @@ imageline($im, 0,$base, $w,$base, $blue);
 
 if (count($t))
 {
-    imagestring($im, 3, $w-29, 0, "Rel.", $red);
-    imagestring($im, 3, $w-29,15, "Top" , $red);
+    imagestring($im, 3, 2, 0, "Rel.", $red);
+    imagestring($im, 3, 2,15, "Top" , $red);
 }
 else if (count($p))
 {
-    imagestring($im, 3, $w-29,0, "Dock", $azure);
-    imagestring($im, 3, $w-36,15, "Score" , $azure);
+    imagestring($im, 3, 2,0, "Dock", $azure);
+    imagestring($im, 3, 2,15, "Score" , $azure);
 }
 
 if (count($t) || count($e))
 {
-    // Right labels first, so that left lines take precedence.
-    for ($top = 1; $top <= floor($maxt); $top += 1)
+    for ($top = 1; $top <= floor($maxt); $top += 2)
     {
         $dy = intval($base-1 - $tscale*$top);
 
-        if (!($top & 1))
-        {
-            imageline($im, $xbuf/3,$dy, $w-$xbuf/3,$dy, $wine );
-            imagestring($im, 3, $w-$xbuf/6,$dy-8, $top, $red);
-            imagestring($im, 3, 2,$dy-8, $top, $red);
-        }
+        imageline($im, $xbuf/3,$dy, $w-$xbuf/3,$dy, $wine );
+        imagestring($im, 3, $w-$xbuf/6,$dy-8, $top, $red);
+        imagestring($im, 3, 2,$dy-8, $top, $red);
     }
-
-    // Left labels.
-    /*
-    imagestring($im, 3, 2,0, "log10", $green);
-    imagestring($im, 3, 2,15, "EC50", $green);
-
-    for ($ec = floor($maxe); $ec >= ceil($mine); $ec -= 1)
-    {
-        $dy = intval($base-1 - $escale*($maxe-$ec));
-
-        imageline($im, $xbuf/3,$dy, $w-$xbuf/3,$dy, $cyan);
-        imagestring($im, 3, 2,$dy-8, $ec, $green);
-    }
-        */
 }
 
 if (count($p))
@@ -372,6 +360,8 @@ foreach (array_values($bytree) as $x => $orid)
                 : 0.35;
             $yc = imagecolorallocatealpha($im, $orcol[0], $orcol[1], $orcol[2], max(0, min(127, 127-127.0*$opc)));
             imagefilledrectangle($im, $dx,$y1, $e[$orid]?($dx+$res-2):$dx,$y1, $yc);
+
+            if ($tprobs[$orid]) $y1 -= 2;
         }
     }
 
@@ -422,7 +412,7 @@ foreach (array_values($bytree) as $x => $orid)
     }
     if ($peak && $dy < $h/1.4)
     {
-        $texts[] = [$dx, $dy-5, @$tprobs[$orid] ? "($orid)" : $orid];
+        $texts[] = [$dx, $dy-5, (@$tprobs[$orid] && $t[$orid] < 5) ? "($orid)" : $orid];
         $txtop[] = intval(0.81 * (100-(floatval(@$prots[$orid]['expression'] ?: 100))));
     }
 }
