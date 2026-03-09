@@ -55,6 +55,7 @@ function generate_btree($sequences, $prefix = "")
         }
     }
     if (isset($sequences["VN1R"])) $outgroup = "VN1R";
+    if (isset($sequences["TAAR1"])) $outgroup = "TAAR1";
     // echo "OUTGROUP: $outgroup\n";
 
     $fasta = "";
@@ -188,8 +189,32 @@ foreach ($subseqs as $fam => $subs)
     }
 }
 
-$famtree = generate_btree($consensus);
+$cladeseqs =
+[
+    "ClassI" => generate_consensus([ $consensus["OR51"], $consensus["OR52"], $consensus["OR56"] ]),
+    "OR1/3/7" => generate_consensus([ $consensus["OR1"], $consensus["OR3"], $consensus["OR7"] ]),
+    "OR2/13" => generate_consensus([ $consensus["OR2"], $consensus["OR13"] ]),
+    "OR4/12" => generate_consensus([ $consensus["OR4"], $consensus["OR12"] ]),
+    "OR5/8/9" => generate_consensus([ $consensus["OR5"], $consensus["OR8"], $consensus["OR9"] ]),
+    "OR6/10/11" => generate_consensus([ $consensus["OR6"], $consensus["OR10"], $consensus["OR11"] ]),
+    "OR14" => $consensus["OR14"],
+];
+
+$cladetree = generate_btree($cladeseqs, "00");
+print_r($cladetree);
+
+$famtree = generate_btree(["OR51" => $consensus["OR51"], "OR52" => $consensus["OR52"], "OR56" => $consensus["OR56"]], $cladetree["ClassI"]);
+$famtree = array_merge($famtree, generate_btree(["OR1" => $consensus["OR1"], "OR3" => $consensus["OR3"], "OR7" => $consensus["OR7"]], $cladetree["OR1/3/7"]));
+$famtree = array_merge($famtree, generate_btree(["OR2" => $consensus["OR2"], "OR13" => $consensus["OR13"]], $cladetree["OR2/13"]));
+$famtree = array_merge($famtree, generate_btree(["OR4" => $consensus["OR4"], "OR12" => $consensus["OR12"]], $cladetree["OR4/12"]));
+$famtree = array_merge($famtree, generate_btree(["OR5" => $consensus["OR5"], "OR8" => $consensus["OR8"], "OR9" => $consensus["OR9"]], $cladetree["OR5/8/9"]));
+$famtree = array_merge($famtree, generate_btree(["OR6" => $consensus["OR6"], "OR10" => $consensus["OR10"], "OR11" => $consensus["OR11"]], $cladetree["OR6/10/11"]));
+$famtree = array_merge($famtree, generate_btree(["OR14" => $consensus["OR14"]], $cladetree["OR14"]));
+$famtree = array_merge($famtree, generate_btree(["TAAR" => $consensus["TAAR"]], "01"));
+$famtree = array_merge($famtree, generate_btree(["VN1R" => $consensus["VN1R"]], "1"));
+
 print_r($famtree);
+// exit;
 
 $subtree = [];
 
