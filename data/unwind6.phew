@@ -1,0 +1,37 @@
+LOAD $arg2
+
+IF $45.51 = "D" OR $45.51 = "E" THEN LET %rn45 = %45.51
+ELSE IF $45.52 = "D" OR $45.52 = "E" THEN LET %rn45 = %45.52
+ELSE DIE "unable to comply"
+
+IF $45.51 = "D" OR $45.51 = "E" THEN LET $c45 = "CG"
+ELSE IF $45.52 = "D" OR $45.52 = "E" THEN LET $c45 = "CD"
+IF $c45 = "CG" THEN LET $cprev45 = "CB"
+ELSE LET $cprev45 = "CG"
+
+IF $6.55 = "Y" OR $6.55 = "H" THEN LET %rn6 = %6.55
+ELSE DIE "unable to comply"
+
+IF $6.55 = "Y" THEN LET $o6 = "OH"
+ELSE IF $6.55 = "H" THEN LET $o6 = "NE2"
+
+MEASURE %rn6 EXTH %rn45 NEARESV &d
+IF &d < 3.25 THEN GOTO _exit_script
+ECHO "Distance was " &d
+LET %i = 0
+_loop:
+WIND %6.51 %6.60 -0.5
+MEASURE %rn6 EXTH %rn45 NEARESV &e
+ECHO "Distance to " &e
+IF &e > &d GOTO _exit_loop
+IF &e < 3.25 GOTO _exit_loop
+LET &d = &e
+LET %i ++
+IF %i < 70 GOTO _loop
+_exit_loop:
+IF &e > &d THEN WIND %6.51 %6.60 0.5
+
+_exit_script:
+MEASURE %rn6 EXTH %rn45 NEARESV &d
+ECHO "Distance now " &d
+SAVE $arg2
