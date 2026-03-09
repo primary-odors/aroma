@@ -9,8 +9,8 @@ global $prots, $aminos;
 
 function lencmp($a, $b)
 {
-	if (substr($a, 0, 1) == '*') $a = substr($a, 1);
-	if (substr($b, 0, 1) == '*') $b = substr($b, 1);
+	if (!is_array($a) && substr($a, 0, 1) == '*') $a = substr($a, 1);
+	if (!is_array($b) && substr($b, 0, 1) == '*') $b = substr($b, 1);
     $ca = is_array($a) ? count($a) : strlen($a);
     $cb = is_array($b) ? count($b) : strlen($b);
 

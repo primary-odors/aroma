@@ -278,6 +278,7 @@ $tnodes['*'.find_bt_of_root([$subtree["OR2"]["M"], $subtree["OR2"]["T"], $subtre
 $tnodes['*'.find_bt_of_root([$subtree["OR5"]["A"], $subtree["OR5"]["AN"]])] = "OR5A/AN";
 $tnodes['*'.find_bt_of_root([$subtree["OR6"]["A"], $subtree["OR6"]["B"], $subtree["OR6"]["P"], $subtree["OR6"]["Y"]])] = "Schiff6";
 $tnodes['*'.find_bt_of_root([$subtree["OR10"]["D"], $subtree["OR10"]["G"], $subtree["OR10"]["S"]])] = "OR10D/G/S";
+$tnodes['*'.find_bt_of_root([$famtree["OR51"], $famtree["OR52"]])] = "OR51/52";
 
 $rcptree = [];
 foreach ($subtree as $fam => $subs)
