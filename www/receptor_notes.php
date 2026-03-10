@@ -29,6 +29,17 @@ function correlate_receptors_aromanotes()
         foreach ($odors as $oid => $odor)
         {
             $pair = best_empirical_pair($rcpid, $oid, true);
+            if (!isset($pair['adjusted_curve_top']))
+            {
+                if (@$pair['type'] == 'pa') $pair['adjusted_curve_top'] = 2.5;
+                if (@$pair['type'] == 'a') $pair['adjusted_curve_top'] = 5;
+                if (@$pair['type'] == 'vsa') $pair['adjusted_curve_top'] = 10;
+                if (@$pair['type'] == 'sa') $pair['adjusted_curve_top'] = 8;
+                if (@$pair['type'] == 'ma') $pair['adjusted_curve_top'] = 4;
+                if (@$pair['type'] == 'wa') $pair['adjusted_curve_top'] = 1;
+                if (@$pair['type'] == 'vwa') $pair['adjusted_curve_top'] = 0.1;
+            }
+            // if ($rcpid == "OR2AP1" && isset($pair['type'])) print_r($pair);
             $xval = 0.0;
             $samples = 0;
             if (is_array($pair))

@@ -311,11 +311,13 @@ if (@$odor['activity']) foreach ($odor['activity'] as $refurl => $acv)
                 if ($a['type'] == "ma") $tosort = 5;
                 if ($a['type'] == "wa") $tosort = 1;
                 if ($a['type'] == "vwa") $tosort = 0.1;
+                $agonist[$rcpid] = true;
             }
             else if ($a['type'] == "pa")
             {
                 $top = "(probable&nbsp;agonist)";
                 $tosort = 0.001;
+                $agonist[$rcpid] = true;
             }
 
             if ($top)
