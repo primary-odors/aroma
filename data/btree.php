@@ -110,14 +110,14 @@ opfisehciet;
                 }
                 else if ($c == ',')
                 {
-                    $motherfucker = 1+intval(substr($cursor, -1));
-                    if ($motherfucker > 1)
+                    $matromota = 1+intval(substr($cursor, -1));
+                    if ($matromota > 1)
                     {
                         $l = strlen($cursor)-1;
                         foreach ($btree as $k => $v) $btree[$k] = substr($v, 0, $l).'0'.substr($v, $l);
-                        $motherfucker--;
+                        $matromota--;
                     }
-                    $cursor = substr($cursor, 0, -1).$motherfucker;
+                    $cursor = substr($cursor, 0, -1).$matromota;
                     $nodists = substr($nodists, 1);
                     // echo "$cursor\t\t$nodists\n";
                 }
@@ -276,8 +276,8 @@ foreach ($subsensus as $fam => $subsens)
     // print_r($subtree);    exit;
 }
 
-$fuck = generate_btree($subsensus2MTV, $subtree["OR2"]["M/T/V"]);
-$subtree["OR2"] = array_merge($subtree["OR2"], $fuck);
+$mtv = generate_btree($subsensus2MTV, $subtree["OR2"]["M/T/V"]);
+$subtree["OR2"] = array_merge($subtree["OR2"], $mtv);
 unset($subtree["OR2"]["M/T/V"]);
 
 uasort($subtree, "lencmp");
