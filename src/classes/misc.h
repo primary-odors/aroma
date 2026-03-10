@@ -14,12 +14,14 @@ enum PoseSearchType
 {
     pst_best_binding,
     pst_tumble_spheres,
+    pst_randhyd,
     pst_copyfrom,
     pst_external
 };
 
 // Default search algorithm if not specified by config file or command line args.
-#define default_search_algorithm pst_best_binding
+// #define default_search_algorithm pst_best_binding
+#define default_search_algorithm pst_randhyd
 
 struct Vector;
 struct Point;

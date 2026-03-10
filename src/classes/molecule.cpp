@@ -7441,6 +7441,29 @@ Atom** Molecule::get_most_bindable(int max_num, Atom* for_atom)
     return bba;
 }
 
+Atom *Molecule::get_most_polar()
+{
+    if (!atoms) return nullptr;
+    Atom *result = atoms[0];            // if no polar atoms, e.g. H2, default to the first atom. Note even alkanes have polar atoms since the C-H bond 
+                                        // is very weakly polar (electronegativity = 2.55 vs. 2.20).
+    float hbest = 0;
+    int i;
+    for (i=0; atoms[i]; i++)
+    {
+        if (atoms[i]->Z < 2) continue;
+        if (atoms[i]->is_backbone) continue;
+        float h = fabs(atoms[i]->is_polar());
+        if (atoms[i]->is_pi()) h += 0.1;    // Effect of polar-pi potential.
+
+        if (h > hbest)
+        {
+            hbest = h;
+            result = atoms[i];
+        }
+    }
+    return result;
+}
+
 Box Molecule::get_bounding_box() const
 {
     if (noAtoms(atoms)) return Box(0,0,0,0,0,0);

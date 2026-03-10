@@ -240,6 +240,10 @@ for rcpid in data.protutils.prots.keys():
                     pocket["bridge"] = [pocket["bridge"]]
                 for st in pocket["bridge"]:
                     newcfg.append("BRIDGE " + st)
+            if "search" in pocket:
+                if isinstance(pocket["search"], str):
+                    pocket["search"] = [pocket["search"]]
+                newcfg.append("SEARCH " + pocket["search"])
             if "flxr" in pocket:
                 if isinstance(pocket["flxr"], str):
                     pocket["flxr"] = [pocket["flxr"]]

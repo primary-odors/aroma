@@ -1605,6 +1605,11 @@ int interpret_config_line(char** words)
             pdpst = pst_tumble_spheres;
             return 1;
         }
+        else if (!strcmp(words[1], "RH"))
+        {
+            pdpst = pst_randhyd;
+            return 1;
+        }
         else if (!strcmp(words[1], "CP"))
         {
             int lf = 1;
@@ -3810,6 +3815,64 @@ _try_again:
                         }
                     }
                 }
+                else if (pdpst == pst_randhyd)
+                {
+                    Molecule* llig = ligand->get_monomer(0);
+                    int maxlt = ligand->get_heavy_atom_count()+8;
+                    g_ligtargs = new LigandTarget[maxlt];
+                    int ltargs = Search::identify_ligand_pairing_targets(llig, g_ligtargs, maxlt);
+
+                    AminoAcid** lrs = new AminoAcid*[SPHREACH_MAX];
+                    memset(lrs, 0, SPHREACH_MAX*sizeof(AminoAcid**));
+
+                    if (gcav)
+                    {
+                        j = gcav->resnos(protein, lrs);
+                        lrs[j] = nullptr;
+                        lrs[SPHREACH_MAX-1] = nullptr;
+                    }
+                    else
+                    {
+                        memcpy(lrs, reaches_spheroid[nodeno], sizeof(AminoAcid**)*SPHREACH_MAX);
+                        for (j=0; lrs[j]; j++);
+                    }
+
+                    Atom *bh = llig->get_most_polar();
+                    if (!bh)
+                    {
+                        cerr << "Molecule::get_most_polar() failed." << endl;
+                        throw 0xbadc0de;
+                    }
+
+                    i = -1;
+                    while (i<0 || lrs[i]->hydrophilicity() < hydrophilicity_cutoff)
+                    {
+                        i = rand() % j;
+                        if (frand(0,1) < 0.001) break;          // just in case there are no polar side chains.
+                    }
+
+                    Atom *rh = lrs[i]->get_most_polar();
+                    if (!rh)
+                    {
+                        cerr << "AminoAcid::get_most_polar() failed." << endl;
+                        throw 0xbadc0de;
+                    }
+
+                    ligand->movability = MOV_ALL;
+                    float ropt = InteratomicForce::optimal_distance(bh, rh);
+                    ligand->recenter(nodecen);
+                    LocRotation lrot = align_points_3d(bh->loc, rh->loc, ligand->get_barycenter());
+                    lrot.origin = ligand->get_barycenter();
+                    Vector v = rh->loc.subtract(bh->loc);
+                    v.r -= ropt;
+                    ligand->move(v);
+
+                    ligand->stay_close_mine = bh;
+                    ligand->stay_close_other = rh;
+                    ligand->stay_close_mol = lrs[i];
+                    ligand->stay_close_optimal = ropt;
+                    ligand->stay_close_tolerance = 0.1 * ropt;
+                }
                 else if (pdpst == pst_copyfrom)
                 {
                     Search::copy_ligand_position_from_file(protein, ligand, copyfrom_filename.c_str(), copyfrom_ligname, copyfrom_resno);
@@ -3885,6 +3948,7 @@ _try_again:
             freeze_bridged_residues();
             if (output_each_iter) output_iter(nodeoff, cfmols, "initial placement");
             if (pdpst == pst_best_binding) ligand->movability = (MovabilityType)(MOV_CAN_AXIAL | MOV_CAN_RECEN | MOV_CAN_FLEX);
+            if (pdpst == pst_randhyd) ligand->movability = MOV_ALL;
 
             freeze_bridged_residues();
             if (auditfn.length())
