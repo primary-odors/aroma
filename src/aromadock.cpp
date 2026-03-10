@@ -3295,9 +3295,21 @@ _try_again:
                 AminoAcid** aaclashables = protein->clashable_residues(aa->get_residue_no());
                 Interaction e = aa->get_intermol_binding(aaclashables);
                 aa->conform_atom_to_location(a->name, loneliest);
-                aa->conform_molecules((Molecule**)aaclashables, nullptr, 20);
+                aa->conform_molecules((Molecule**)aaclashables, nullptr, 10);
                 Interaction f = aa->get_intermol_binding(protein->clashable_residues(aa->get_residue_no()));
-                if (f.clash > clash_limit_per_aa*2 || f.summed() > e.summed()+clash_limit_per_aa*2) was.restore_state(aa);
+                if (f.clash > clash_limit_per_aa*frand(0, 5) && f.summed() > e.summed()+clash_limit_per_aa*5)
+                {
+                    was.restore_state(aa);
+                    #if _dbg_point_side_chains_inward
+                    cout << "Rotated " << aa->get_name() << ":" << a->name << " but clash was worse; reverted.";
+                    cout << " mclashables";
+                    for (j=0; aaclashables[j]; j++) cout << " " << aaclashables[j]->get_name();
+                    cout << endl;
+                    #endif
+                }
+                #if _dbg_point_side_chains_inward
+                else cout << "Rotated " << aa->get_name() << ":" << a->name << " inward." << endl;
+                #endif
             }
             #endif
 

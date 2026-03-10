@@ -423,6 +423,7 @@
 #define _dbg_peptide_bond_formation 0
 #define _dbg_pocket_DeltaG_solv 0
 #define _dbg_point_avg 0
+#define _dbg_point_side_chains_inward 0
 #define _dbg_polar_calc 0
 #define _dbg_polsat 0
 #define _dbg_rap_resolve_special_atom 0
