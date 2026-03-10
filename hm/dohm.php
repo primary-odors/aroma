@@ -132,13 +132,7 @@ switch ($fam)
     break;
 
     case 'OR2':
-    if ($rcpid == "OR2AP1") $knowns = "$consOR6";
-    else if ($famsub == "OR2M")
-    {
-        $knowns = "$CHRM1, $CLASSII";
-        $restraints_misc[] = "3.33|5.42|7.3";
-    }
-    else $knowns = "$CLASSII";
+    $knowns = "$consOR2";
     break;
 
     case 'OR3':
@@ -168,8 +162,7 @@ switch ($fam)
     break;
 
     case 'OR8':
-    if ($rcpid == "OR8S1") $knowns = "$consOR6";
-    else $knowns = "$consOR5";
+    $knowns = "$consOR5";
     break;
 
     case 'OR9':
@@ -177,9 +170,7 @@ switch ($fam)
     break;
 
     case 'OR10':
-    if ($rcpid == "OR10AD1") $knowns = "$consOR2";
-    else if ($famsub == "OR10D" || $famsub == "OR10G" || $famsub == "OR10S") $knowns = "$consOR4, $consOR6";
-    else $knowns = "$consOR6";
+    $knowns = "$consOR6";
     break;
 
     case 'OR11':
@@ -187,12 +178,11 @@ switch ($fam)
     break;
 
     case 'OR12':
-    $knowns = "$consOR4, $consOR6";
+    $knowns = "$consOR4";
     break;
 
     case 'OR13':
-    if ($famsub == "OR13A" || $famsub == "OR13G") $knowns = "$consOR1";             // OR13A/G are actually OR3s.
-    else $knowns = "$consOR2";
+    $knowns = "$consOR2";
     break;
 
     case 'OR14':
@@ -214,7 +204,7 @@ switch ($fam)
     break;
 
     case 'OR56':
-    $knowns = "$consOR51, $consOR52";
+    $knowns = "$CLASSI";
     break;
 
     default:
@@ -243,7 +233,7 @@ if ($knowns)
         else if ($aa4552 == 'D') $atom4551 = "OD1:$rno4552:A";
         else if ($aa4552 == 'E') $atom4551 = "OE1:$rno4552:A";
 
-        if ($aa4551 == 'E' || $aa4551 == 'Q' || $aa4552 == 'E') $knowns = "$consOR2b";
+        // if ($aa4551 == 'E' || $aa4551 == 'Q' || $aa4552 == 'E') $knowns = "$consOR2b";
     }
 
     $ipdbfname = "pdbs/$fam/$rcpid.inactive.pdb";
