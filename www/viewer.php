@@ -216,7 +216,14 @@ function svg_from_smiles(smiles, w, h)
     foreach (array_keys($sim[$protid][0]) as $bw)
     {
         echo " &nbsp; ";
-        $lbsrn[$bw] = resno_from_bw($protid, $bw);
+        try
+        {
+            $lbsrn[$bw] = resno_from_bw($protid, $bw);
+        }
+        catch (Exception $ex)
+        {
+            continue;
+        }
         $aa = letter_at_bw($protid, $bw);
         $bwx = str_replace('.', 'x', $bw);
         echo "<a href=\"#\" onclick=\"$('.show$bwx').toggle();\">$aa{$lbsrn[$bw]}</a>";
