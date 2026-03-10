@@ -3872,6 +3872,13 @@ _try_again:
                     ligand->stay_close_mol = lrs[i];
                     ligand->stay_close_optimal = ropt;
                     ligand->stay_close_tolerance = 0.1 * ropt;
+                    ligand->stay_close2_mine = nullptr;
+                    ligand->stay_close2_mol = nullptr;
+                    ligand->stay_close2_other = nullptr;
+
+                    g_bbr->pri_res = lrs[i];
+                    g_bbr->pri_tgt = new LigandTarget();
+                    g_bbr->pri_tgt->single_atom = bh;
                 }
                 else if (pdpst == pst_copyfrom)
                 {
@@ -4025,7 +4032,8 @@ _try_again:
             #if _allow_Schiff_base_formation
             selfish_side_chains = true;
             Molecule* Schiff_water = nullptr;
-            if (g_bbr->pri_res->is_amine() && g_bbr->pri_tgt->single_atom
+            if (g_bbr->pri_res && g_bbr->pri_tgt
+                && g_bbr->pri_res->is_amine() && g_bbr->pri_tgt->single_atom
                 && g_bbr->pri_tgt->single_atom->get_family() == CHALCOGEN
                 && g_bbr->pri_tgt->single_atom->is_bonded_to(TETREL, 2))
             {
