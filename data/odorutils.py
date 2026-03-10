@@ -111,6 +111,8 @@ def check_forms(ligname, randomize=True):
     return result
 
 def ensure_sdf_exists(odorant):
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir("..")
     o = find_odorant(odorant)
     if not "sdfname" in o:
         output_file = "sdf/" + o['full_name'].replace(' ', '_') + ".sdf"
@@ -119,8 +121,6 @@ def ensure_sdf_exists(odorant):
     isomers = check_isomers(o['full_name'])
     forms = check_forms(o['full_name'])
     if isomers:
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        os.chdir("..")
         if len(isomers):
             for iso in o["isomers"].keys():
                 if "preiso" in o.keys():
@@ -166,8 +166,15 @@ def ensure_sdf_exists(odorant):
                             subprocess.run(cmd)
 
 def smiles_to_sdf(smiles, output_file):
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir("..")
     try:
         mol = Chem.MolFromSmiles(smiles)
+        if not mol:
+            cmd = ["obabel", "--gen3d", "-osdf", f"-O{output_file}", f"-:{smiles}" ]
+            print(" ".join(cmd))
+            subprocess.run(cmd)
+            return
         mol = Chem.AddHs(mol)
         AllChem.EmbedMolecule(mol)
         AllChem.UFFOptimizeMolecule(mol)
@@ -180,3 +187,4 @@ def smiles_to_sdf(smiles, output_file):
             print(f"Invalid SMILES string: {smiles}")
     except Exception as e:
         print(f"Error occurred generating 3D structure: {e}")
+

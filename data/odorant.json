@@ -5030,10 +5030,10 @@
         "smiles": "OCC=C(CCC=C(CCC=C(C)C)C)C",
         "isomers":
         {
-            "(2E,6E)": "OC\\C=C\\(CC\\C=C\\(CCC=C(C)C)C)C",
-            "(2Z,6E)": "OC\\C=C/(CC\\C=C\\(CCC=C(C)C)C)C",
-            "(2E,6Z)": "OC\\C=C\\(CC\\C=C/(CCC=C(C)C)C)C",
-            "(2Z,6Z)": "OC\\C=C/(CC\\C=C/(CCC=C(C)C)C)C"
+            "(2E,6E)": "OC/C=C/(CC/C=C/(CCC=C(C)C)C)C",
+            "(2Z,6E)": "OC/C=C\\(CC/C=C/(CCC=C(C)C)C)C",
+            "(2E,6Z)": "OC/C=C/(CC/C=C\\(CCC=C(C)C)C)C",
+            "(2Z,6Z)": "OC/C=C\\(CC/C=C\\(CCC=C(C)C)C)C"
         },
         "aroma":
         {
