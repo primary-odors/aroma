@@ -850,7 +850,7 @@ function loadFile(fileData, fileName = "", custom_color_scheme = false)
                         if (!n)
                         {
                         	var btnid = "posebtn"+p;
-                        	
+
                         	if (!$('#'+btnid).length)
                         	{
 		                        var posea = document.createElement("a");
@@ -858,7 +858,7 @@ function loadFile(fileData, fileName = "", custom_color_scheme = false)
 		                        if (p==1) $(posea).addClass("hilite");
 		                        posea.innerText = p;
 		                        posea.id = btnid;
-		                        posea.setAttribute("onclick", "showPose("+p+");");
+		                        posea.setAttribute("onclick", "showPose("+p+"); showNode(gnode);");
 
 		                        posey.appendChild(posea);
                             }
@@ -4761,15 +4761,15 @@ $("body").on("keyup", function(e, obj)
     if (e.keyCode >= 37 && e.keyCode <= 40)
     {
         if (e.keyCode == 37) showNode(gnode-1);
-        if (e.keyCode == 38) showPose(gpose-1);
+        if (e.keyCode == 38) { showPose(gpose-1); showNode(gnode); }
         if (e.keyCode == 39) showNode(gnode+1);
-        if (e.keyCode == 40) showPose(gpose+1);
+        if (e.keyCode == 40) { showPose(gpose+1); showNode(gnode); }
         e.preventDefault();
         return;
     }
     else
     {
-        if (cc > 0x60 && cc <= 0x7a) showPose(cc-0x60);
+        if (cc > 0x60 && cc <= 0x7a) { showPose(cc-0x60); showNode(gnode); }
         else if (cc >= 0x30 && cc <= 0x39) showNode(cc-0x30);
         else if (cc > 0x40 && cc <= 0x59) showNode(cc-55);
         e.preventDefault();
