@@ -41,6 +41,9 @@ else:
     oid = o["oid"]
     lopt = "*"
 
+if popt == "all": popt = "*"
+if lopt == "all": lopt = "*"
+
 resseek = False
 if re.match("([A-Y]+[0-9]{1,2}[.][0-9]{2},?)+", popt):
     resseek = popt.split(",")
@@ -76,44 +79,45 @@ for rcpid in data.protutils.prots.keys():
         else:
             o = data.odorutils.odors[ligid]
 
-        if popt == "emp" or lopt == "emp":
-            if not "activity" in o: continue
-            isemp = False
-            for url in o["activity"].keys():
-                acv = o["activity"][url]
-                if rcpid in acv: isemp = True
-            if not isemp: continue
-        elif popt == "ago" or lopt == "ago":
-            if not "activity" in o: continue
-            isago = False
-            for url in o["activity"].keys():
-                acv = o["activity"][url]
-                if rcpid in acv:
-                    if "adjusted_curve_top" in acv[rcpid]:
-                        if float(acv[rcpid]["adjusted_curve_top"]) > 0:
+        if lopt != "*":
+            if popt == "emp" or lopt == "emp":
+                if not "activity" in o: continue
+                isemp = False
+                for url in o["activity"].keys():
+                    acv = o["activity"][url]
+                    if rcpid in acv: isemp = True
+                if not isemp: continue
+            elif popt == "ago" or lopt == "ago":
+                if not "activity" in o: continue
+                isago = False
+                for url in o["activity"].keys():
+                    acv = o["activity"][url]
+                    if rcpid in acv:
+                        if "adjusted_curve_top" in acv[rcpid]:
+                            if float(acv[rcpid]["adjusted_curve_top"]) > 0:
+                                isago = True
+                        elif "type" in acv[rcpid]:
+                            if acv[rcpid]["type"] in ["vsa", "sa", "ma", "wa", "pa", "a"]:
+                                isago = True
+                        elif "ec50" in acv[rcpid]:
                             isago = True
-                    elif "type" in acv[rcpid]:
-                        if acv[rcpid]["type"] in ["vsa", "sa", "ma", "wa", "pa", "a"]:
-                            isago = True
-                    elif "ec50" in acv[rcpid]:
-                        isago = True
-            if not isago: continue
-        elif lopt == "top":
-            p = data.protutils.prots[rcpid]
-            if not "best_agonist" in p: continue
-            if ligid != p["best_agonist"]: continue
-        elif lopt == "jk":
-            skipdock = True
-        elif not oid:
-            isnote = False
-            if "aroma" in o:
-                for url in o["aroma"]:
-                    aromata = o["aroma"][url]
-                    if lopt in aromata: isnote = True
-            if not isnote:
-                if not re.search(lopt, o["smiles"]) and not re.search(lopt, o["full_name"]):
-                    # TODO: Moieties
-                    continue
+                if not isago: continue
+            elif lopt == "top":
+                p = data.protutils.prots[rcpid]
+                if not "best_agonist" in p: continue
+                if ligid != p["best_agonist"]: continue
+            elif lopt == "jk":
+                skipdock = True
+            elif not oid:
+                isnote = False
+                if "aroma" in o:
+                    for url in o["aroma"]:
+                        aromata = o["aroma"][url]
+                        if lopt in aromata: isnote = True
+                if not isnote:
+                    if not re.search(lopt, o["smiles"]) and not re.search(lopt, o["full_name"]):
+                        # TODO: Moieties
+                        continue
 
         lignu = o["full_name"].replace(' ', '_')
         isomers = data.odorutils.check_isomers(o["full_name"])
