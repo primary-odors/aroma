@@ -45,6 +45,7 @@
 #define SPHREACH_MAX 256
 #define VALENCE_EXCEEDS_GEOMETRY 22
 #define SOFT_CNTCTS_MAX 256
+#define OUT_PRECIS 3
 
 #if defined(__linux__) || defined(__sun) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
     #define CMD_CHECK_INSTALLED_3P_SMILES_PARSER "which obabel"

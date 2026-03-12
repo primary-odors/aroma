@@ -1,4 +1,5 @@
 
+#include <iomanip>
 #include "scoring.h"
 
 float init_total_binding_by_type[_INTER_TYPES_LIMIT];
@@ -763,7 +764,8 @@ std::ostream& operator<<(std::ostream& output, const DockResult& dr)
             if (!dr.is_mcr[l] && fabs(dr.mkJmol[l]) < dr.out_itemized_e_cutoff) continue;
 
             if (dr.do_output_colors) colorize(dr.mkJmol[l]);
-            output << dr.metric[l] << ": " << dr.mkJmol[l]*dr.energy_mult << "{" << dr.mstab[l] << "}";
+            output.precision(OUT_PRECIS);
+            output << dr.metric[l] << ": " << dr.mkJmol[l]*dr.energy_mult << " {" << dr.mstab[l] << "}";
             if (dr.display_binding_atoms) output << " |";
             if (dr.display_binding_atoms) output << " " << (dr.mb_atom1_name[l] ? dr.mb_atom1_name[l] : "-");
             if (dr.display_binding_atoms) output << " " << (dr.mb_atom2_name[l] ? dr.mb_atom2_name[l] : "-");
@@ -810,6 +812,7 @@ std::ostream& operator<<(std::ostream& output, const DockResult& dr)
         }
 
         if (dr.do_output_colors) colorize(dr.bytype[l]);
+        output.precision(OUT_PRECIS);
         output << lbtyp << dr.bytype[l]*dr.energy_mult << endl;
         if (dr.do_output_colors) colorless();
     }
@@ -824,6 +827,7 @@ _btyp_unassigned:
     // output << "Ligand volume: " << dr.ligvol << endl;
     if (dr.ligand_waters_energy) output << "Pocket ligand-water energy: " << dr.ligand_waters_energy << endl;
     if (dr.do_output_colors) colorize(dr.kJmol);
+    output.precision(OUT_PRECIS);
     output << "Total: " << dr.kJmol*dr.energy_mult << endl;
     if (dr.do_output_colors) colorless();
     if (dr.do_output_colors) colorize(dr.kJmol_raw);
@@ -861,6 +865,8 @@ _btyp_unassigned:
                 << " at " << dr.stay_close2_protein->distance_to(dr.stay_close2_ligand) << " A." << endl;
         }
     }
+
+    output.precision(OUT_PRECIS);
     output << "Worst atom clash: " << dr.worst_energy*dr.energy_mult << endl;
 
     if (dr.out_lig_int_e) output << "Ligand internal energy: " << dr.ligand_self*dr.energy_mult << endl;
@@ -913,6 +919,7 @@ _btyp_unassigned:
             )
         {
             if (fabs(dr.missed_connections[l]) < dr.out_itemized_e_cutoff) continue;
+            output.precision(OUT_PRECIS);
             if (dr.metric[l]) output << dr.metric[l] << ": " << dr.missed_connections[l]*dr.energy_mult << endl;
         }
         output << endl;
@@ -935,6 +942,7 @@ _btyp_unassigned:
             )
         {
             if (fabs(dr.mvdWrepl[l]) < dr.out_itemized_e_cutoff) continue;
+            output.precision(OUT_PRECIS);
             if (dr.metric[l]) output << dr.metric[l] << ": " << dr.mvdWrepl[l]*dr.energy_mult << endl;
         }
         output << endl;
