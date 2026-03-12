@@ -3550,6 +3550,17 @@ _try_again:
 
                 protein->set_conditional_basicities();
 
+                float cvr = Avogadro;
+                if (ncvtys) for (i=0; i<ncvtys; i++)
+                {
+                    float r = cvtys[i].get_center().get_3d_distance(ligand->get_barycenter());
+                    if (r < cvr)
+                    {
+                        gcav = &cvtys[i];
+                        cvr = r;
+                    }
+                }
+
                 #if reuse_best_pose
                 if (aa_best_pose
                     && !pathnodes
@@ -3582,17 +3593,6 @@ _try_again:
                     if (ltargs > 0)
                     {
                         if (pose==1) cout << "Performing Best-Binding search..." << endl << flush;
-
-                        float cvr = Avogadro;
-                        if (ncvtys) for (i=0; i<ncvtys; i++)
-                        {
-                            float r = cvtys[i].get_center().get_3d_distance(ligand->get_barycenter());
-                            if (r < cvr)
-                            {
-                                gcav = &cvtys[i];
-                                cvr = r;
-                            }
-                        }
 
                         Molecule* llig;
                         AminoAcid** lrs = new AminoAcid*[SPHREACH_MAX];
@@ -3825,23 +3825,35 @@ _try_again:
                     AminoAcid** lrs = new AminoAcid*[SPHREACH_MAX];
                     memset(lrs, 0, SPHREACH_MAX*sizeof(AminoAcid**));
 
+                    #if _dbg_rh_selection
+                    cout << endl << "Residues for randhyd" << endl;
+                    #endif
                     if (gcav)
                     {
                         j = gcav->resnos(protein, lrs);
                         lrs[j] = nullptr;
                         lrs[SPHREACH_MAX-1] = nullptr;
+                        #if _dbg_rh_selection
+                        cout << endl << " from global cavity" << endl;
+                        #endif
                     }
                     else
                     {
                         memcpy(lrs, reaches_spheroid[nodeno], sizeof(AminoAcid**)*SPHREACH_MAX);
                         for (j=0; lrs[j]; j++);
+                        #if _dbg_rh_selection
+                        cout << endl << " from reaches_spheroid[]" << endl;
+                        #endif
                     }
 
                     #if _dbg_rh_selection
-                    cout << endl << "Residues for randhyd:" << endl;
+                    cout << ":" << endl;
                     for (i=0; lrs[i]; i++)
                     {
-                        cout << lrs[i]->get_name() << " hydro = " << lrs[i]->hydrophilicity() << endl;
+                        float lrh = lrs[i]->hydrophilicity();
+                        colorize(-lrh*20);
+                        cout << lrs[i]->get_name() << " hydro = " << lrh << endl;
+                        colorless();
                     }
                     cout << endl;
                     #endif
@@ -3871,7 +3883,7 @@ _try_again:
                     do
                     {
                         i = rand() % j;
-                        if (lrs[i]->hydrophilicity() > hydrophilicity_cutoff)
+                        if (lrs[i]->hydrophilicity() > hydrophilicity_cutoff || frand(0,1) < 1e-6)          // just in case there are no polar side chains.
                         {
                             if (bhal && lrs[i]->get_charge() > 0.8 && lrs[i]->pi_stackability() < 0.1) break;
                             if ((lrs[i]->has_hbond_donors() && bhbt < bhg) || (lrs[i]->has_hbond_acceptors() && bH))
@@ -3880,7 +3892,6 @@ _try_again:
                                     break;
                             }
                         }
-                        if (frand(0,1) < 1e-6) break;          // just in case there are no polar side chains.
                     } while (1);
 
                     Atom *rh = lrs[i]->get_most_polar();
