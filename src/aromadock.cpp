@@ -3826,7 +3826,7 @@ _try_again:
                     memset(lrs, 0, SPHREACH_MAX*sizeof(AminoAcid**));
 
                     #if _dbg_rh_selection
-                    cout << endl << "Residues for randhyd" << endl;
+                    cout << endl << "Residues for randhyd";
                     #endif
                     if (gcav)
                     {
@@ -3834,7 +3834,7 @@ _try_again:
                         lrs[j] = nullptr;
                         lrs[SPHREACH_MAX-1] = nullptr;
                         #if _dbg_rh_selection
-                        cout << endl << " from global cavity" << endl;
+                        cout << " from global cavity";
                         #endif
                     }
                     else
@@ -3842,7 +3842,7 @@ _try_again:
                         memcpy(lrs, reaches_spheroid[nodeno], sizeof(AminoAcid**)*SPHREACH_MAX);
                         for (j=0; lrs[j]; j++);
                         #if _dbg_rh_selection
-                        cout << endl << " from reaches_spheroid[]" << endl;
+                        cout << " from reaches_spheroid[]";
                         #endif
                     }
 
