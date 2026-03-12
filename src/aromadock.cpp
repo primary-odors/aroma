@@ -3901,9 +3901,26 @@ _try_again:
                     ligand->recenter(nodecen);
                     LocRotation lrot = align_points_3d(bh->loc, rh->loc, ligand->get_barycenter());
                     lrot.origin = ligand->get_barycenter();
+                    ligand->rotate(lrot);
                     Vector v = rh->loc.subtract(bh->loc);
                     v.r -= ropt;
                     ligand->move(v);
+
+                    float theta, bthet = 0, step = hexagonal/10;
+                    Interaction be = 0;
+                    LocatedVector lv = (Vector)(rh->loc.subtract(nodecen));
+                    lv.origin = rh->loc;
+                    for (theta = 0; theta<M_PI*2; theta+=step)
+                    {
+                        ligand->rotate(lv, step);
+                        Interaction e = ligand->get_intermol_binding((Molecule**)lrs);
+                        if (e.improved(be))
+                        {
+                            be = e;
+                            bthet = theta;
+                        }
+                    }
+                    ligand->rotate(lv, bthet);
 
                     ligand->stay_close_mine = bh;
                     ligand->stay_close_other = rh;
