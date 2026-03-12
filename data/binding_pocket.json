@@ -15,7 +15,7 @@
                 "appears": "0",
                 "atomtoa": ["D4.56 CG 3.34"],
                 "atomtoi": ["D4.56 CG 5.42"],
-                "search": "BB"
+                "#search": "BB"
             },
             "OCCO":
             {

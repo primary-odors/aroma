@@ -3851,7 +3851,7 @@ _try_again:
                     for (i=0; lrs[i]; i++)
                     {
                         float lrh = lrs[i]->hydrophilicity();
-                        colorize(-lrh*20);
+                        colorize(-lrh*60);
                         cout << lrs[i]->get_name() << " hydro = " << lrh << endl;
                         colorless();
                     }
@@ -3879,22 +3879,28 @@ _try_again:
                     Atom *bH = bh->is_bonded_to("H");
                     bool bhal = bh->is_aldehyde();
 
-                    i = -1;
-                    do
+                    if (!rhmet)
                     {
-                        i = rand() % j;
-                        if (lrs[i]->hydrophilicity() > hydrophilicity_cutoff || frand(0,1) < 1e-6)          // just in case there are no polar side chains.
+                        i = -1;
+                        do
                         {
-                            if (bhal && lrs[i]->get_charge() > 0.8 && lrs[i]->pi_stackability() < 0.1) break;
-                            if ((lrs[i]->has_hbond_donors() && bhbt < bhg) || (lrs[i]->has_hbond_acceptors() && bH))
+                            i = rand() % j;
+                            if (lrs[i]->hydrophilicity() > hydrophilicity_cutoff
+                                || lrs[i]->coordmtl
+                                || frand(0,1) < 1e-6                                // just in case there are no polar side chains.
+                                )
                             {
-                                if (frand(0,1) < 0.25 * fabs(lrs[i]->hydrophilicity()))
-                                    break;
+                                if (bhal && lrs[i]->get_charge() > 0.8 && lrs[i]->pi_stackability() < 0.1) break;
+                                if ((lrs[i]->has_hbond_donors() && bhbt < bhg) || (lrs[i]->has_hbond_acceptors() && bH))
+                                {
+                                    if (frand(0,1) < 0.25 * fabs(lrs[i]->hydrophilicity()))
+                                        break;
+                                }
                             }
-                        }
-                    } while (1);
+                        } while (1);
+                    }
 
-                    Atom *rh = lrs[i]->get_most_polar();
+                    Atom *rh = rhmet ? rhmet : lrs[i]->get_most_polar();
                     if (!rh)
                     {
                         cerr << "AminoAcid::get_most_polar() failed." << endl;
@@ -4981,20 +4987,20 @@ _exitposes:
         if (debug) *debug << found_poses << " pose(s) found." << endl;
     }
 
-    cout << "Best candidate pose energy: " << (kcal ? best_energy/_kcal_per_kJ : best_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
-    if (output) *output << "Best candidate pose energy: " << (kcal ? best_energy/_kcal_per_kJ : best_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
-    if (debug) *debug << "Best candidate pose energy: " << (kcal ? best_energy/_kcal_per_kJ : best_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
+    cout << "Best candidate pose energy: " << (kcal ? best_energy*_kcal_per_kJ : best_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
+    if (output) *output << "Best candidate pose energy: " << (kcal ? best_energy*_kcal_per_kJ : best_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
+    if (debug) *debug << "Best candidate pose energy: " << (kcal ? best_energy*_kcal_per_kJ : best_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
 
     if (found_poses)
     {
-        cout << "Best accepted pose energy: " << (kcal ? best_acc_energy/_kcal_per_kJ : best_acc_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
-        if (output) *output << "Best accepted pose energy: " << (kcal ? best_acc_energy/_kcal_per_kJ : best_acc_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
-        if (debug) *debug << "Best accepted pose energy: " << (kcal ? best_acc_energy/_kcal_per_kJ : best_acc_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
+        cout << "Best accepted pose energy: " << (kcal ? best_acc_energy*_kcal_per_kJ : best_acc_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
+        if (output) *output << "Best accepted pose energy: " << (kcal ? best_acc_energy*_kcal_per_kJ : best_acc_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
+        if (debug) *debug << "Best accepted pose energy: " << (kcal ? best_acc_energy*_kcal_per_kJ : best_acc_energy) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
     }
 
-    cout << "Best worst clash: " << (kcal ? best_worst_clash/_kcal_per_kJ : best_worst_clash) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
-    if (output) *output << "Best worst clash: " << (kcal ? best_worst_clash/_kcal_per_kJ : best_worst_clash) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
-    if (debug) *debug << "Best worst clash: " << (kcal ? best_worst_clash/_kcal_per_kJ : best_worst_clash) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
+    cout << "Best worst clash: " << (kcal ? best_worst_clash*_kcal_per_kJ : best_worst_clash) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
+    if (output) *output << "Best worst clash: " << (kcal ? best_worst_clash*_kcal_per_kJ : best_worst_clash) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
+    if (debug) *debug << "Best worst clash: " << (kcal ? best_worst_clash*_kcal_per_kJ : best_worst_clash) << (kcal ? " kcal/mol." : " kJ/mol.") << endl;
 
     if (!found_poses)
     {
