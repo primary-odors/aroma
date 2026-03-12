@@ -210,12 +210,12 @@ for rcpid in data.protutils.prots.keys():
         cavfni = cavfna.replace(".active.", ".inactive.")
         if not os.path.exists(cavfna):
             cmd = ["bin/cavity_search", "-p", f"pdbs/{fam}/{rcpid}.active.pdb", "-o", cavfna,
-                "--yminr", "3.40", "--ymaxr", "45.52", "--sr", "3.28", "--er", "7.50"]
+                "--yminr", "3.40", "--ymaxr", "45.52", "--sr", "3.28", "--er", "7.48"]
             print(" ".join(cmd))
             subprocess.run(cmd)
         if not os.path.exists(cavfni):
             cmd = ["bin/cavity_search", "-p", f"pdbs/{fam}/{rcpid}.inactive.pdb", "-o", cavfni,
-                "--yminr", "3.40", "--ymaxr", "45.52", "--sr", "3.28", "--er", "7.50"]
+                "--yminr", "3.40", "--ymaxr", "45.52", "--sr", "3.28", "--er", "7.48"]
             print(" ".join(cmd))
             subprocess.run(cmd)
         newcfg.append(f"VCVTY {cavfna}")
