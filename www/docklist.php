@@ -131,14 +131,12 @@ foreach ($prots as $protid => $p)
         set_time_limit(600);
         if (isset($cached[$fname]) /*&& intval($cached[$fname]['nump'])*/ && filemtime($fpn) < $cachemt)
         {
-            $cached = true;
             extract($cached[$fname]);
             // echo "<p>$protid $odor $mode<br><pre>".print_r($cached[$fname], true)."</pre></p>";
             ob_flush(); flush();
         }
         else
         {
-            $cached = false;
             ob_flush(); flush();
             echo "<!-- Reading $fpn ... -->\n";
             chdir(__DIR__);
@@ -349,7 +347,7 @@ foreach ($prots as $protid => $p)
 
         if ($benerg_inactive > 0) $benerg_inactive = 0;
         if ($occl_active >= 0.6)
-            $prediction = max(0, -$benerg_raw_active * equilibrium(-$benerg_raw_active, 0) * sqrt($occl_active)) * 1.0
+            $prediction = max(0, -$benerg_raw_active) * 3.0
                 * equilibrium(-$benerg_active * $occl_active, $nump_inactive ? (-$benerg_inactive * $occl_inactive) : 0);
         else $prediction = 0;
 

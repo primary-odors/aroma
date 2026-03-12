@@ -538,6 +538,11 @@ void InteratomicForce::fetch_applicable(Atom* a, Atom* b, InteratomicForce** ret
         if (look[i]->achg && look[i]->achg != achgn) continue;
         if (look[i]->bchg && look[i]->bchg != bchgn) continue;
 
+        if (look[i]->type == pi)
+        {
+            if (Za < 2 && Zb < 2) continue;
+        }
+
         if (look[i]->type == polarpi)
         {
             if (fabs(a->is_polar()) < hydrophilicity_cutoff && fabs(b->is_polar()) < hydrophilicity_cutoff) continue;
