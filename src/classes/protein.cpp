@@ -2930,6 +2930,32 @@ MCoord* Protein::coordinate_metal(MCoord* mtlcoords, int count)
             mcoord_aa[l]->conform_atom_to_location(coord_atoms[l], lmtl, 20, optimal[l]);
         }
 
+        for (l=0; mcoord_aa[l] && coord_atoms[l]; l++)
+        {
+            Atom *omega = mcoord_aa[l]->get_nearest_atom(ptmtl);
+            if (!omega) continue;
+            omega = omega->get_heavy_atom();
+            if (omega == coord_atoms[l]) continue;
+            if (omega->get_Greek() > coord_atoms[l]->get_Greek()) continue;
+            Bond *b = coord_atoms[l]->get_bond_by_idx(0);
+            if (b)
+            {
+                float step = fiftyseventh, rS = coord_atoms[l]->distance_to(lmtl), rC = omega->distance_to(lmtl), rcOrig;
+                rcOrig = rC;
+                b->rotate(step);
+                rC = omega->distance_to(lmtl);
+                if (rC < rcOrig) step = -step;
+                rcOrig = rC;
+
+                for (j=0; j<360; j++)
+                {
+                    b->rotate(step);
+                    rC = omega->distance_to(lmtl);
+                    if (rC > rS) break;
+                }
+            }
+        }
+
         for (q=0; q<100; q++)
         {
             for (l=0; mcoord_aa[l] && coord_atoms[l]; l++)

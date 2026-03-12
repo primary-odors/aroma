@@ -3851,7 +3851,7 @@ _try_again:
                     for (i=0; lrs[i]; i++)
                     {
                         float lrh = lrs[i]->hydrophilicity();
-                        colorize(-lrh*60);
+                        colorize(-lrh*40);
                         cout << lrs[i]->get_name() << " hydro = " << lrh << endl;
                         colorless();
                     }
