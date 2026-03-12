@@ -431,6 +431,7 @@
 #define _dbg_repack 0
 #define _DBG_RESBMULT 0
 #define _dbg_residue_poses 0
+#define _dbg_rh_selection 0
 #define _dbg_rock_pic 0
 #define _dbg_rshpm_apply 0
 #define _dbg_Schiff_internal_clashes 0

@@ -2593,9 +2593,11 @@ float AminoAcid::hydrophilicity() const
 {
     int i, count=0;
     float total=0, weight;
+    Atom *N = get_atom("N");
     for (i=0; atoms[i]; i++)
     {
         if (atoms[i]->is_backbone) continue;
+        if (N && atoms[i]->is_bonded_to(N)) continue;       // proline fix.
         if (!strcmp(atoms[i]->name, "HA")) continue;
 
         // if (residue_no == 155) cout << atoms[i]->name << " charge " << atoms[i]->get_charge() << endl;

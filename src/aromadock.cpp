@@ -3837,6 +3837,15 @@ _try_again:
                         for (j=0; lrs[j]; j++);
                     }
 
+                    #if _dbg_rh_selection
+                    cout << endl << "Residues for randhyd:" << endl;
+                    for (i=0; lrs[i]; i++)
+                    {
+                        cout << lrs[i]->get_name() << " hydro = " << lrs[i]->hydrophilicity() << endl;
+                    }
+                    cout << endl;
+                    #endif
+
                     Atom *rhmet = nullptr;
                     for (i=0; lrs[i]; i++)
                     {
@@ -3856,17 +3865,22 @@ _try_again:
 
                     int bhbt = bh->get_bonded_atoms_count(), bhg = bh->get_geometry();
                     Atom *bH = bh->is_bonded_to("H");
+                    bool bhal = bh->is_aldehyde();
 
                     i = -1;
                     do
                     {
                         i = rand() % j;
-                        if (lrs[i]->hydrophilicity() < hydrophilicity_cutoff)
+                        if (lrs[i]->hydrophilicity() > hydrophilicity_cutoff)
                         {
-                            if (lrs[i]->has_hbond_donors() && bhbt < bhg) break;
-                            else if (lrs[i]->has_hbond_acceptors() && bH) break;
+                            if (bhal && lrs[i]->get_charge() > 0.8 && lrs[i]->pi_stackability() < 0.1) break;
+                            if ((lrs[i]->has_hbond_donors() && bhbt < bhg) || (lrs[i]->has_hbond_acceptors() && bH))
+                            {
+                                if (frand(0,1) < 0.25 * fabs(lrs[i]->hydrophilicity()))
+                                    break;
+                            }
                         }
-                        if (frand(0,1) < 0.00001) break;          // just in case there are no polar side chains.
+                        if (frand(0,1) < 1e-6) break;          // just in case there are no polar side chains.
                     } while (1);
 
                     Atom *rh = lrs[i]->get_most_polar();
@@ -3875,6 +3889,12 @@ _try_again:
                         cerr << "AminoAcid::get_most_polar() failed." << endl;
                         throw 0xbadc0de;
                     }
+
+                    #if _dbg_rh_selection
+                    cout << "Selected ligand:" << bh->name << " ... " << lrs[i]->get_name() << ":" << rh->name
+                        << " hydro = " << lrs[i]->hydrophilicity()
+                        << endl << endl;
+                    #endif
 
                     ligand->movability = MOV_ALL;
                     float ropt = InteratomicForce::optimal_distance(bh, rh);
