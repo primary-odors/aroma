@@ -491,6 +491,8 @@ void DockResult::initialize(Protein* protein, Molecule* ligand, int sphres, Amin
     ligand_pocket_occlusion = ligand->occlusion((Molecule**)reaches_spheroid);
     ligand_pocket_wet_energy *= 1.0 - fmin(1, ligand_pocket_occlusion);
 
+    char fmtbuff[256];      // OUT_PRECIS
+    memset(fmtbuff, 0, 256*sizeof(char));
     for (l=0; l<ninterall; l++)
     {
         if (fabs(interall[l]) < 0.1) continue;
@@ -526,7 +528,9 @@ void DockResult::initialize(Protein* protein, Molecule* ligand, int sphres, Amin
         else atomlvl += (std::string)"(ligand)";
         atomlvl += (std::string)":" + (std::string)interall_a1[l]->name;
         atomlvl += (std::string)": ";
-        atomlvl += std::to_string(interall[l]) + (std::string)"\n";
+        sprintf(fmtbuff, "%.3f", interall[l]);
+        atomlvl += (std::string)fmtbuff + (std::string)"\n";
+        fmtbuff[0] = 0;
     }
 
     #if include_mcr_in_dock_energy
