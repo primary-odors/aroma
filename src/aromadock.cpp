@@ -4516,8 +4516,9 @@ _try_again:
                     }
                 }
                 dr[drcount][nodeno].miscdata += (std::string)"Raw ligand binding energy: " 
-                    + std::to_string(dr[drcount][nodeno].kJmol) + (std::string)" kJ/mol.\n";
-                dr[drcount][nodeno].miscdata += (std::string)"Soft contact anomaly: " + std::to_string(anomaly) + (std::string)" kJ/mol.\n";
+                    + std::to_string(dr[drcount][nodeno].kJmol * dr[drcount][nodeno].energy_mult) + (std::string)".\n";
+                dr[drcount][nodeno].miscdata += (std::string)"Soft contact anomaly: "
+                    + std::to_string(anomaly * dr[drcount][nodeno].energy_mult) + (std::string)".\n";
                 dr[drcount][nodeno].miscdata += (std::string)"Soft spatial anomaly: " + std::to_string(sanomaly) + (std::string)" A.\n";
 
                 if (dr[drcount][nodeno].kJmol > 0 && !output_something_even_if_it_is_wrong)
