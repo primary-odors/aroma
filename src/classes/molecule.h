@@ -305,6 +305,7 @@ public:
     Atom** get_most_bindable(int max_num = 3);						// Return the atoms with the greatest potential intermol binding.
     Atom** get_most_bindable(int max_num, Atom* for_atom);
     Atom* get_most_polar();
+    Atom* get_most_metal_coord(Atom *metal);
 
     float similar_atom_proximity(Molecule* other);
 

@@ -7464,6 +7464,31 @@ Atom *Molecule::get_most_polar()
     return result;
 }
 
+Atom *Molecule::get_most_metal_coord(Atom* m)
+{
+    if (!atoms) return nullptr;
+    Atom *result = nullptr;
+
+    float mbest = 0;
+    int i;
+    for (i=0; atoms[i]; i++)
+    {
+        if (atoms[i]->Z < 2) continue;
+        if (atoms[i]->is_backbone) continue;
+        int fam = atoms[i]->get_family();
+        if (fam != CHALCOGEN && fam != PNICTOGEN) continue;
+        if (atoms[i]->get_bonded_atoms_count() >= atoms[i]->get_geometry()) continue;
+        float h = InteratomicForce::metal_compatibility(atoms[i], m);
+
+        if (h > mbest)
+        {
+            mbest = h;
+            result = atoms[i];
+        }
+    }
+    return result;
+}
+
 Box Molecule::get_bounding_box() const
 {
     if (noAtoms(atoms)) return Box(0,0,0,0,0,0);

@@ -3837,19 +3837,37 @@ _try_again:
                         for (j=0; lrs[j]; j++);
                     }
 
-                    Atom *bh = llig->get_most_polar();
+                    Atom *rhmet = nullptr;
+                    for (i=0; lrs[i]; i++)
+                    {
+                        if (lrs[i]->coordmtl)
+                        {
+                            rhmet = lrs[i]->coordmtl;
+                            break;
+                        }
+                    }
+
+                    Atom *bh = rhmet ? llig->get_most_metal_coord(rhmet) : llig->get_most_polar();
                     if (!bh)
                     {
                         cerr << "Molecule::get_most_polar() failed." << endl;
                         throw 0xbadc0de;
                     }
 
+                    int bhbt = bh->get_bonded_atoms_count(), bhg = bh->get_geometry();
+                    Atom *bH = bh->is_bonded_to("H");
+
                     i = -1;
-                    while (i<0 || lrs[i]->hydrophilicity() < hydrophilicity_cutoff)
+                    do
                     {
                         i = rand() % j;
-                        if (frand(0,1) < 0.001) break;          // just in case there are no polar side chains.
-                    }
+                        if (lrs[i]->hydrophilicity() < hydrophilicity_cutoff)
+                        {
+                            if (lrs[i]->has_hbond_donors() && bhbt < bhg) break;
+                            else if (lrs[i]->has_hbond_acceptors() && bH) break;
+                        }
+                        if (frand(0,1) < 0.00001) break;          // just in case there are no polar side chains.
+                    } while (1);
 
                     Atom *rh = lrs[i]->get_most_polar();
                     if (!rh)
