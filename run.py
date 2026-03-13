@@ -208,12 +208,12 @@ for rcpid in data.protutils.prots.keys():
 
         cavfna = f"pdbs/{fam}/{rcpid}.active.cvty"
         cavfni = cavfna.replace(".active.", ".inactive.")
-        if 1: # not os.path.exists(cavfna):
+        if not os.path.exists(cavfna):
             cmd = ["bin/cavity_search", "-p", f"pdbs/{fam}/{rcpid}.active.pdb", "-o", cavfna,
                 "--yminr", "3.37", "--ymaxr", "45.52", "--sr", "3.28", "--er", "7.48"]
             print(" ".join(cmd))
             subprocess.run(cmd)
-        if 1: # not os.path.exists(cavfni):
+        if not os.path.exists(cavfni):
             cmd = ["bin/cavity_search", "-p", f"pdbs/{fam}/{rcpid}.inactive.pdb", "-o", cavfni,
                 "--yminr", "3.37", "--ymaxr", "45.52", "--sr", "3.28", "--er", "7.48"]
             print(" ".join(cmd))
