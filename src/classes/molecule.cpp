@@ -987,8 +987,6 @@ bool Molecule::deprotonate(Atom* which)
     int i;
     for (i=0; atoms[i]; i++);
     i--;
-    if (which)
-        which = which->get_heavy_atom();
     for (; i>=0; i--)
     {
         if (which)

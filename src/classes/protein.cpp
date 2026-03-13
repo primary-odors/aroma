@@ -2962,7 +2962,7 @@ MCoord* Protein::coordinate_metal(MCoord* mtlcoords, int count)
             omega = omega->get_heavy_atom();
             if (omega == coord_atoms[l]) continue;
             if (omega->get_Greek() > coord_atoms[l]->get_Greek()) continue;
-            Bond *b = coord_atoms[l]->get_bond_by_idx(0);
+            Bond *b = coord_atoms[l]->get_bond_by_idx(0)->get_reversed();
             if (b)
             {
                 float step = fiftyseventh, rS = coord_atoms[l]->distance_to(lmtl), rC = omega->distance_to(lmtl), rcOrig;

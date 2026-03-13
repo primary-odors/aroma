@@ -3870,14 +3870,13 @@ _try_again:
                         throw 0xbadc0de;
                     }
                     bh = bh->get_heavy_atom();
-                    if (rhmet && bh->is_bonded_to("H"))
+                    Atom *bH = bh->is_bonded_to("H");
+                    if (rhmet && bH)
                     {
-                        if (llig->deprotonate(bh)) cout << "DEPROTONATED " << bh << endl << endl;
-                        else cerr << "RHBH DEPROT IS A DISMAL FAILURE" << endl << endl;
+                        if (llig->deprotonate(bH)) bH = nullptr;
                     }
 
                     int bhbt = bh->get_bonded_atoms_count(), bhg = bh->get_geometry();
-                    Atom *bH = bh->is_bonded_to("H");
                     bool bhal = bh->is_aldehyde();
 
                     if (!rhmet)
