@@ -2444,6 +2444,7 @@ int main(int argc, char** argv)
 
     int l, j1, i2, miter;
 
+    #if 0
     if (nmtlcoords)
     {
         protein->pocketcen = pocketcen;
@@ -2457,6 +2458,7 @@ int main(int argc, char** argv)
         protein->save_pdb(pf, protein->metals_as_molecule());
         fclose(pf);
     }
+    #endif
 
     if (bridges.size())
     {
@@ -2803,13 +2805,6 @@ _try_again:
         region_clashes[i][0] = region_clashes[i][1] = region_clashes[i][2] = Vector(0,0,0);
     }
 
-    n = nmtlcoords;
-    Point metal_initlocs[n+4];
-    for (i=0; i<n; i++)
-    {
-        metal_initlocs[i] = mtlcoords[i].mtl->loc;
-    }
-
     float best_energy = 0, best_acc_energy = 0, best_worst_clash = 0;
     for (pose = 1; pose <= poses; pose++)
     {
@@ -2883,10 +2878,10 @@ _try_again:
             apply_protein_specific_settings(protein);
         }
 
-        n = nmtlcoords;
-        for (i=0; i<n; i++)
+        if (nmtlcoords)
         {
-            mtlcoords[i].mtl->move(metal_initlocs[i]);
+            protein->pocketcen = pocketcen;
+            protein->coordinate_metal(mtlcoords, nmtlcoords);
         }
 
         freeze_bridged_residues();

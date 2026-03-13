@@ -2877,6 +2877,7 @@ MCoord* Protein::coordinate_metal(MCoord* mtlcoords, int count)
 
         l = 1;
         Atom* coord_atoms[ncr+2];
+        Atom* coordres_HA[ncr+2];
         float optimal[ncr+2];
         for (j=0; j<ncr; j++)
         {
@@ -2889,6 +2890,7 @@ MCoord* Protein::coordinate_metal(MCoord* mtlcoords, int count)
                 aa->movability = MOV_FLEXONLY;
                 lmc[l++] = (Molecule*)aa;
                 coord_atoms[k] = aa->get_one_most_bindable(mcoord);
+                coordres_HA[k] = aa->get_atom("HA");
                 optimal[k] = InteratomicForce::optimal_distance(coord_atoms[k], lmtl);
                 if (!lmtl->residue) lmtl->residue = aa->get_residue_no();
                 Atom** Ss = aa->get_most_bindable(1, lmtl);
@@ -2930,6 +2932,29 @@ MCoord* Protein::coordinate_metal(MCoord* mtlcoords, int count)
             mcoord_aa[l]->conform_atom_to_location(coord_atoms[l], lmtl, 20, optimal[l]);
         }
 
+        for (q=0; q<100; q++)
+        {
+            Point ptmtl_old = ptmtl;
+            for (l=0; mcoord_aa[l] && coord_atoms[l]; l++)
+            {
+                v = coord_atoms[l]->loc.subtract(ptmtl);
+                v.r -= optimal[l];
+                v.r /= 100;
+                ptmtl = ptmtl.add(v);
+                if (coordres_HA[l])
+                {
+                    float rHA = coordres_HA[l]->loc.get_3d_distance(ptmtl);
+                    if (rHA <= coordres_HA[l]->vdW_radius + lmtl->vdW_radius)
+                    {
+                        ptmtl = ptmtl_old;
+                        goto _exit_lmtl_cingon;
+                    }
+                }
+            }
+        }
+        _exit_lmtl_cingon:
+        lmtl->move(ptmtl);
+
         for (l=0; mcoord_aa[l] && coord_atoms[l]; l++)
         {
             Atom *omega = mcoord_aa[l]->get_nearest_atom(ptmtl);
@@ -2956,17 +2981,6 @@ MCoord* Protein::coordinate_metal(MCoord* mtlcoords, int count)
             }
         }
 
-        for (q=0; q<100; q++)
-        {
-            for (l=0; mcoord_aa[l] && coord_atoms[l]; l++)
-            {
-                v = coord_atoms[l]->loc.subtract(ptmtl);
-                v.r -= optimal[l];
-                v.r /= 4;
-                ptmtl = ptmtl.add(v);
-            }
-        }
-        lmtl->move(ptmtl);
         if (0) for (l=0; mcoord_aa[l] && coord_atoms[l]; l++)
         {
             cout << lmtl->name << "..." << mcoord_aa[l]->get_name() << ":" << coord_atoms[l]->name
