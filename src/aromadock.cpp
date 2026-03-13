@@ -3869,6 +3869,12 @@ _try_again:
                         cerr << "Molecule::get_most_polar() failed." << endl;
                         throw 0xbadc0de;
                     }
+                    bh = bh->get_heavy_atom();
+                    if (rhmet && bh->is_bonded_to("H"))
+                    {
+                        if (llig->deprotonate(bh)) cout << "DEPROTONATED " << bh << endl << endl;
+                        else cerr << "RHBH DEPROT IS A DISMAL FAILURE" << endl << endl;
+                    }
 
                     int bhbt = bh->get_bonded_atoms_count(), bhg = bh->get_geometry();
                     Atom *bH = bh->is_bonded_to("H");

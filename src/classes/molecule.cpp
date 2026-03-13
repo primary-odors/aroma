@@ -981,18 +981,27 @@ bool Molecule::protonate()
     return false;
 }
 
-bool Molecule::deprotonate()
+bool Molecule::deprotonate(Atom* which)
 {
     if (!atoms) return false;
     int i;
     for (i=0; atoms[i]; i++);
     i--;
+    if (which)
+        which = which->get_heavy_atom();
     for (; i>=0; i--)
     {
-        if (atoms[i]->is_backbone) continue;
-        if (atoms[i]->is_amide()) continue;
-        int Z = atoms[i]->Z;
-        if (Z > 1) continue;
+        if (which)
+        {
+            if (atoms[i] != which) continue;
+        }
+        else
+        {
+            if (atoms[i]->is_backbone) continue;
+            if (atoms[i]->is_amide()) continue;
+            int Z = atoms[i]->Z;
+            if (Z > 1) continue;
+        }
 
         Bond* b = atoms[i]->get_bond_by_idx(0);
         if (!b) continue;

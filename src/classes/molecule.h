@@ -213,7 +213,7 @@ public:
     int has_hbond_acceptors();                    // N+ is not an h-bond acceptor.
     int has_pi_atoms(bool include_backbone = false);
     bool protonate();
-    bool deprotonate();
+    bool deprotonate(Atom* which = nullptr);
     void propagate_stays();
     bool identify_Schiff_amine(Atom** N, Atom** H1, Atom** H2);
     bool identify_Schiff_carbonyl(Atom** C, Atom** O);

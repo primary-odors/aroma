@@ -1015,8 +1015,8 @@ void Search::pair_targets(Protein* prot, Molecule *ligand,
             Atom* H = (output->pri_tgt)->single_atom->is_bonded_to("H");
             if (H)
             {
-                ligand->delete_atom(H);
-                (output->pri_tgt)->single_atom->increment_charge(-1);
+                // TODO: test this
+                ligand->deprotonate(H);
             }
         }
     }
