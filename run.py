@@ -56,6 +56,16 @@ if len(sys.argv) > 3:
 
 for rcpid in data.protutils.prots.keys():
     fam = data.protutils.family_from_protid(rcpid)
+    sbf = data.protutils.subfamily_from_protid(rcpid)
+    cplll = f"cpllocal/{fam}/{sbf}/{rcpid}.activel.pdb"
+    cplls = f"cpllocal/{fam}/{sbf}/{rcpid}.actives.pdb"
+    if not os.path.exists(cplll) and not os.path.exists(cplls):
+        if not os.path.exists(f"cpllocal/{fam}"): os.mkdir(f"cpllocal/{fam}")
+        if not os.path.exists(f"cpllocal/{fam}/{sbf}"): os.mkdir(f"cpllocal/{fam}/{sbf}")
+        cpll = f"coupled/{fam}/{sbf}/{rcpid}~hGNAL.pdb"
+        cpls = f"coupled/{fam}/{sbf}/{rcpid}~hGNAS2.pdb"
+        if os.path.exists(cpll): data.protutils.prepare_coupled(cpll, cplll, rcpid)
+        if os.path.exists(cpls): data.protutils.prepare_coupled(cpls, cplls, rcpid)
     if protid:
         if rcpid != protid: continue
     else:
@@ -223,8 +233,8 @@ for rcpid in data.protutils.prots.keys():
         if skipdock: break
 
         if fam[0:2] == "OR":
-            sub = int(re.sub("[^0-9]", "", fam))
-            if sub < 50:
+            famno = int(re.sub("[^0-9]", "", fam))
+            if famno < 50:
                 newcfg.append("CNTCT data/OR_ClassII_a.ic")
             else:
                 newcfg.append("CNTCT data/OR_ClassI_a.ic")
