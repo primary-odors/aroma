@@ -7,6 +7,7 @@ require_once("dlmenu.php");
 
 $extra_js = ['js/tabs.js'];
 $extra_css = ['assets/tabs.css'];
+$page_title = "AROMA Docks";
 include("header.php");
 
 chdir(__DIR__);
