@@ -88,6 +88,12 @@ def prepare_coupled(inpfn, outfn, rcpid):
     phew += "UPRIGHT\n"
     phew += "HYDRO\n"
     phew += "BWCENTER\n"
+    with open(f"pdbs/{fam}/{rcpid}.active.pdb", "r") as f:
+        indat = f.read()
+        lines = indat.split("\n")
+        for ln in lines:
+            if ln[0:16] == "REMARK 800 SITE ":
+                phew += f"{ln}\n"
     phew += f"SAVE {outfn}\n"
     with open("tmp/cpl.phew", "w") as f:
         f.write(phew)
